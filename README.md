@@ -34,7 +34,7 @@ Add `guardify` to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  guardify: ^1.0.0
+  guardify: ^1.1.2
 
 dev_dependencies:
   build_runner: ^2.4.0

@@ -209,6 +209,8 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         ? 'allowedRoles.every((r) => activeRoles.contains(r))'
         : 'allowedRoles.any((r) => activeRoles.contains(r))';
 
+    final constPrefix = constructor.isConst && callArgsList.isEmpty ? 'const ' : '';
+
     final generatedCode = '''
 class $generatedClassName$typeParamsDecl extends StatelessWidget {
   final String? currentRole;
@@ -229,10 +231,10 @@ ${constructorParams.join('\n')}
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -243,7 +245,7 @@ ${constructorParams.join('\n')}
     }
 
     if (isAuthorized) {
-      return $targetConstructorInvocation($callArgsList);
+      return $constPrefix$targetConstructorInvocation($callArgsList);
     }
 
     if (fallback != null) {

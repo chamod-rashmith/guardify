@@ -1,3 +1,8 @@
+## 1.1.2
+
+- 🧹 **Dart 3.0+ Null-Aware Collection Elements**: Updated `SecuredGenerator` template to use null-aware pattern matching (`if (... case final role?) role` and `...?`) to eliminate `use_null_aware_elements` linter warnings.
+- ⚡ **Const Constructor Optimization**: Automatically injects `const` keyword for 0-argument const target constructor invocations in generated `.secured.g.dart` widgets, eliminating `prefer_const_constructors` linter warnings and improving runtime performance.
+
 ## 1.1.1
 
 - 🐛 **Named Constructor Selection**: Added automatic fallback to the first public constructor for widgets with named constructors (e.g. `MyWidget.primary(...)`).

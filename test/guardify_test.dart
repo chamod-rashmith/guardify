@@ -257,7 +257,67 @@ void main() {
 
       expect(find.text('Internal Target Fallback'), findsOneWidget);
     });
+
+    testWidgets('SecuredAdminDashboardScreen renders const target widget when authorized', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'admin',
+          child: const MaterialApp(
+            home: SecuredAdminDashboardScreen(),
+          ),
+        ),
+      );
+
+      expect(find.byType(AdminDashboardScreen), findsOneWidget);
+      expect(find.text('Admin Dashboard'), findsOneWidget);
+    });
+
+    testWidgets('SecuredAdminDashboardScreen renders scaffold fallback when unauthorized', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'guest',
+          child: const MaterialApp(
+            home: SecuredAdminDashboardScreen(),
+          ),
+        ),
+      );
+
+      expect(find.byType(AdminDashboardScreen), findsNothing);
+      expect(find.text('Access Denied: Restricted Area!'), findsOneWidget);
+    });
+
+    testWidgets('SecuredFinancialReportCard requires all roles to render', (tester) async {
+      // Test when only 1 of 2 required roles is active -> Should hide
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'manager',
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredFinancialReportCard(totalRevenue: 5000),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(FinancialReportCard), findsNothing);
+
+      // Test when both required roles are active via currentRoles -> Should render
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRoles: const ['manager', 'finance'],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredFinancialReportCard(totalRevenue: 5000),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(FinancialReportCard), findsOneWidget);
+      expect(find.text('Total Revenue: \$5000.00'), findsOneWidget);
+    });
   });
 }
+
 
 

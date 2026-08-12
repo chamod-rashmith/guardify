@@ -30,10 +30,10 @@ class SecuredDeleteUserButton extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -76,10 +76,10 @@ class SecuredFinancialReportCard extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -124,10 +124,10 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -138,7 +138,7 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
     }
 
     if (isAuthorized) {
-      return AdminDashboardScreen();
+      return const AdminDashboardScreen();
     }
 
     if (fallback != null) {
@@ -184,10 +184,10 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -235,10 +235,10 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
@@ -278,10 +278,10 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-      if (scope != null && scope.currentRole != null) scope.currentRole!,
-      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+      if (currentRole case final role?) role,
+      ...?currentRoles,
+      if (scope?.currentRole case final role?) role,
+      ...?scope?.currentRoles,
     };
 
     final bool isAuthorized;
