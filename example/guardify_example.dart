@@ -82,6 +82,36 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 }
 
+// 4. Generic Widget Class with Enum Roles
+enum DemoRole { admin, manager, user }
+
+@Secured([DemoRole.admin], fallback: FallbackType.text)
+class GenericDataCard<T> extends StatelessWidget {
+  final T data;
+  final String title;
+
+  const GenericDataCard({
+    super.key,
+    required this.data,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          '$title: $data',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+}
+
+
 // --- MAIN FLUTTER APP ---
 
 void main() {

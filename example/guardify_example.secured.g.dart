@@ -100,10 +100,7 @@ class SecuredFinancialReportCard extends StatelessWidget {
     return const Center(
       child: Text(
         'Access Denied: Restricted Area!',
-        style: TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -149,9 +146,7 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Access Denied'),
-      ),
+      appBar: AppBar(title: const Text('Access Denied')),
       body: const Center(
         child: Text(
           'Access Denied: Restricted Area!',
@@ -161,6 +156,59 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SecuredGenericDataCard<T> extends StatelessWidget {
+  final String? currentRole;
+  final Iterable<String>? currentRoles;
+  final Widget? fallback;
+
+  final T data;
+  final String title;
+
+  const SecuredGenericDataCard({
+    super.key,
+    this.currentRole,
+    this.currentRoles,
+    this.fallback,
+    required this.data,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const allowedRoles = <String>['admin'];
+    final scope = GuardifyScope.of(context);
+
+    final activeRoles = <String>{
+      if (currentRole != null) currentRole!,
+      if (currentRoles != null) ...currentRoles!,
+      if (scope != null && scope.currentRole != null) scope.currentRole!,
+      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+    };
+
+    final bool isAuthorized;
+    if (scope?.permissionChecker != null) {
+      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+    } else {
+      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
+    }
+
+    if (isAuthorized) {
+      return GenericDataCard<T>(data: data, title: title);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    return const Center(
+      child: Text(
+        'Access Denied: Restricted Area!',
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
       ),
     );
   }

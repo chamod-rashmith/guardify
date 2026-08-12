@@ -12,8 +12,8 @@ enum FallbackType {
 
 /// Annotation used to secure Flutter widgets with Role-Based Access Control (RBAC).
 class Secured {
-  /// The list of role strings authorized to view/access the annotated widget.
-  final List<String> allowedRoles;
+  /// The list of role strings or enum values authorized to view/access the annotated widget.
+  final List<dynamic> allowedRoles;
 
   /// Optional custom name for the generated secured widget class. Defaults to `Secured<ClassName>`.
   final String? name;

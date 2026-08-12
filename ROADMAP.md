@@ -19,16 +19,16 @@ This document outlines the strategic future development roadmap for **Guardify**
 ### 📍 Phase 1: Code Generator Core & AST Modernization (`v1.1.0`)
 *Focus: Bulletproof code generation, generic support, compile-time guardrails, and AST formatting.*
 
-- [ ] **Generic Widget Support**: Support generic type parameters on annotated widget classes (e.g. `class UserTable<T> extends StatelessWidget`).
+- [x] **Generic Widget Support**: Support generic type parameters on annotated widget classes (e.g. `class UserTable<T> extends StatelessWidget`).
   ```dart
   // Generated wrapper preserves <T>
   class SecuredUserTable<T> extends StatelessWidget { ... }
   ```
-- [ ] **Enum & Constant Role Extraction**: Support passing enums in `@Secured` (e.g., `@Secured([UserRole.admin])`) without missing string values.
-- [ ] **Strict AST Compile-Time Guardrails**:
+- [x] **Enum & Constant Role Extraction**: Support passing enums in `@Secured` (e.g., `@Secured([UserRole.admin])`) without missing string values.
+- [x] **Strict AST Compile-Time Guardrails**:
   - Validate that annotated elements extend `Widget` (throw `InvalidGenerationSourceError` if applied to standard classes).
   - Ensure `allowedRoles` is not empty.
-- [ ] **`code_builder` & `dart_style` Migration**: Transition from manual string interpolation to `code_builder` AST generation for formatted code output.
+- [x] **`code_builder` & `dart_style` Migration**: Transition from manual string interpolation to `code_builder` AST generation for formatted code output.
 
 ---
 

@@ -187,5 +187,43 @@ void main() {
       expect(find.text('Access Denied Custom Fallback'), findsOneWidget);
       expect(find.byType(DeleteUserButton), findsNothing);
     });
+
+    testWidgets('SecuredGenericDataCard<T> renders when role matches enum admin role', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'admin',
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredGenericDataCard<int>(
+                title: 'Secret Code',
+                data: 1337,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Secret Code: 1337'), findsOneWidget);
+    });
+
+    testWidgets('SecuredGenericDataCard<T> shows fallback text when role is unauthorized', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'user',
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredGenericDataCard<int>(
+                title: 'Secret Code',
+                data: 1337,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Secret Code: 1337'), findsNothing);
+      expect(find.text('Access Denied: Restricted Area!'), findsOneWidget);
+    });
   });
 }
+

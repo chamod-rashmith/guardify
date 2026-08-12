@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'secured_annotation.dart';
@@ -14,7 +15,16 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
   ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
-        '@Secured annotation can only be applied to classes.',
+        '@Secured annotation can only be applied to Flutter Widget classes.',
+        element: element,
+      );
+    }
+
+    final isWidget = element.name == 'Widget' ||
+        element.allSupertypes.any((t) => t.element.name == 'Widget');
+    if (!isWidget) {
+      throw InvalidGenerationSourceError(
+        '@Secured annotation can only be applied to Flutter Widget classes.',
         element: element,
       );
     }
@@ -31,12 +41,25 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
     final customName = annotation.peek('name')?.stringValue;
     final generatedClassName = customName ?? 'Secured$className';
 
-    // Read allowedRoles list
+    // Read allowedRoles list (supporting String literals and Enum objects)
     final allowedRolesReader = annotation.read('allowedRoles');
-    final allowedRoles = allowedRolesReader.listValue
-        .map((object) => object.toStringValue())
-        .whereType<String>()
-        .toList();
+    final allowedRoles = allowedRolesReader.listValue.map((object) {
+      final str = object.toStringValue();
+      if (str != null) return str;
+
+      final enumFieldName = object.getField('name')?.toStringValue() ??
+          object.getField('_name')?.toStringValue();
+      if (enumFieldName != null) return enumFieldName;
+
+      return null;
+    }).whereType<String>().toList();
+
+    if (allowedRoles.isEmpty) {
+      throw InvalidGenerationSourceError(
+        '@Secured annotation requires at least one allowed role in `allowedRoles`.',
+        element: element,
+      );
+    }
 
     final formattedRoles = allowedRoles.map((role) => "'$role'").join(', ');
 
@@ -54,6 +77,15 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         fallbackStrategy = name;
       }
     }
+
+    // Process generic type parameters
+    final typeParams = element.typeParameters;
+    final typeParamsDecl = typeParams.isNotEmpty
+        ? '<${typeParams.map((tp) => tp.bound != null ? '${tp.name} extends ${tp.bound!.getDisplayString()}' : tp.name).join(', ')}>'
+        : '';
+    final typeParamsArgs = typeParams.isNotEmpty
+        ? '<${typeParams.map((tp) => tp.name).join(', ')}>'
+        : '';
 
     // Inspect target class constructor parameters
     final constructor = element.unnamedConstructor;
@@ -134,8 +166,8 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         ? 'allowedRoles.every((r) => activeRoles.contains(r))'
         : 'allowedRoles.any((r) => activeRoles.contains(r))';
 
-    return '''
-class $generatedClassName extends StatelessWidget {
+    final generatedCode = '''
+class $generatedClassName$typeParamsDecl extends StatelessWidget {
   final String? currentRole;
   final Iterable<String>? currentRoles;
   final Widget? fallback;
@@ -168,7 +200,7 @@ ${constructorParams.join('\n')}
     }
 
     if (isAuthorized) {
-      return $className($callArgsList);
+      return $className$typeParamsArgs($callArgsList);
     }
 
     if (fallback != null) {
@@ -179,5 +211,12 @@ $fallbackWidgetCode
   }
 }
 ''';
+
+    try {
+      return DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
+          .format(generatedCode);
+    } catch (_) {
+      return generatedCode;
+    }
   }
 }
