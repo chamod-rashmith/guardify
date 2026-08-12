@@ -1,0 +1,13 @@
+targets:
+  $default:
+    builders:
+      guardify:
+        enabled: true
+
+builders:
+  guardify:
+    import: 'package:guardify/src/builder.dart'
+    builder_factories: ['guardifyBuilder']
+    build_extensions: {'.dart': ['.secured.g.dart']}
+    auto_apply: dependents
+    build_to: source

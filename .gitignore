@@ -1,0 +1,7 @@
+# https://dart.dev/tools/private-files
+.dart_tool/
+.build/
+build/
+
+# Avoid committing pubspec.lock for library packages
+pubspec.lock
