@@ -34,7 +34,7 @@ Add `guardify` to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  guardify: ^1.1.3
+  guardify: ^1.1.4
 
 dev_dependencies:
   build_runner: ^2.4.0
@@ -182,7 +182,7 @@ Connect custom authentication rules (such as Firebase Auth Claims or JWT permiss
 
 ```dart
 GuardifyScope(
-  permissionChecker: (allowedRoles, {requireAll = false}) {
+  permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
     return myAuthService.canUserAccess(allowedRoles);
   },
   child: const MyApp(),

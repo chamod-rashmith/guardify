@@ -1,6 +1,6 @@
 name: guardify
 description: A Dart code generation package for Role-Based UI Access Control in Flutter widgets.
-version: 1.1.3
+version: 1.1.4
 repository: https://github.com/chamod-rashmith/guardify
 
 environment:

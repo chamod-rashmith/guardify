@@ -1,3 +1,11 @@
+## 1.1.4
+
+- 🛡️ **Critical Security Patch**: Fixed custom `permissionChecker` bypass where direct widget role props (`currentRole` / `currentRoles`) were ignored when a parent scope defined a custom `permissionChecker`.
+- 🐛 **Property Collision & Fallback Disambiguation**: Resolved parameter collisions on target widgets accepting custom `fallback` parameters by cleanly isolating the access-denied fallback UI property (`accessDeniedFallback`).
+- ⚡ **Set Equality Optimization**: Updated `GuardifyScope.updateShouldNotify` to compare active roles using content set equality, preventing unnecessary subtree rebuilds when new list instances with identical roles are passed.
+- 🔑 **Enum Normalization & Empty Role Guard**: Enhanced `GuardifyScope.isAuthorized` to normalize qualified enum strings (e.g. `'DemoRole.admin'` -> `'admin'`) for context extension checks and returning `false` when `allowedRoles` is empty.
+- 🛠️ **Analyzer Reflection Compatibility**: Upgraded constructor reflection logic in `SecuredGenerator` to prevent dynamic reflection crashes across Dart Analyzer versions.
+
 ## 1.1.3
 
 - 🧹 **Dart Linter `use_null_aware_elements` Fix**: Refactored `SecuredGenerator` template to construct `activeRoles` Set imperatively using `.add()` and `.addAll()` with local variable type promotion (`directRole`, `directRoles`, `scopeRole`, `scopeRoles`), completely eliminating collection-if checks and resolving `use_null_aware_elements` linter warnings across all Dart 3.0+ linter configurations.
