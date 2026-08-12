@@ -191,6 +191,13 @@ GuardifyScope(
 
 ---
 
+## 🗺️ Roadmap
+
+Interested in upcoming features, UI fallback expansion, or security audit tooling? Check out our detailed [ROADMAP.md](ROADMAP.md) to see planned milestones for future releases.
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
