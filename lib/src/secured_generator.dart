@@ -41,18 +41,28 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
     final customName = annotation.peek('name')?.stringValue;
     final generatedClassName = customName ?? 'Secured$className';
 
-    // Read allowedRoles list (supporting String literals and Enum objects)
+    // Read allowedRoles list (supporting String literals, Enum values, and qualified Enum names)
     final allowedRolesReader = annotation.read('allowedRoles');
-    final allowedRoles = allowedRolesReader.listValue.map((object) {
+    final allowedRolesSet = <String>{};
+
+    for (final object in allowedRolesReader.listValue) {
       final str = object.toStringValue();
-      if (str != null) return str;
+      if (str != null) {
+        allowedRolesSet.add(str);
+      } else {
+        final enumFieldName = object.getField('name')?.toStringValue() ??
+            object.getField('_name')?.toStringValue();
+        final enumTypeName = object.type?.element?.name;
+        if (enumFieldName != null) {
+          allowedRolesSet.add(enumFieldName);
+          if (enumTypeName != null && enumTypeName.isNotEmpty) {
+            allowedRolesSet.add('$enumTypeName.$enumFieldName');
+          }
+        }
+      }
+    }
 
-      final enumFieldName = object.getField('name')?.toStringValue() ??
-          object.getField('_name')?.toStringValue();
-      if (enumFieldName != null) return enumFieldName;
-
-      return null;
-    }).whereType<String>().toList();
+    final allowedRoles = allowedRolesSet.toList();
 
     if (allowedRoles.isEmpty) {
       throw InvalidGenerationSourceError(
@@ -87,39 +97,67 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         ? '<${typeParams.map((tp) => tp.name).join(', ')}>'
         : '';
 
-    // Inspect target class constructor parameters
-    final constructor = element.unnamedConstructor;
+    // Inspect target class constructors (unnamed constructor or first public constructor fallback)
+    ConstructorElement? constructor = element.unnamedConstructor;
+    if (constructor == null || constructor.isPrivate) {
+      final publicConstructors =
+          element.constructors.where((c) => !c.isPrivate).toList();
+      if (publicConstructors.isNotEmpty) {
+        constructor = publicConstructors.first;
+      }
+    }
+
+    if (constructor == null) {
+      throw InvalidGenerationSourceError(
+        'Target class `$className` must have at least one public constructor.',
+        element: element,
+      );
+    }
+
+    final constructorName = constructor.name;
+    final isNamedConstructor = constructorName != null &&
+        constructorName.isNotEmpty &&
+        constructorName != 'new';
+
+    final targetConstructorInvocation = isNamedConstructor
+        ? '$className$typeParamsArgs.$constructorName'
+        : '$className$typeParamsArgs';
+
+    final reservedNames = {'currentRole', 'currentRoles', 'fallback'};
     final fieldsDeclarations = <String>[];
     final constructorParams = <String>[];
     final positionalCallArgs = <String>[];
     final namedCallArgs = <String>[];
 
-    if (constructor != null) {
-      final params = constructor.formalParameters;
-      for (final param in params) {
-        final paramName = param.name;
-        // Skip null or 'key' parameter as super handles key
-        if (paramName == null || paramName == 'key') continue;
+    final params = constructor.formalParameters;
+    for (final param in params) {
+      final paramName = param.name;
+      // Skip null or 'key' parameter as super handles key
+      if (paramName == null || paramName == 'key') continue;
 
-        final paramType = param.type.getDisplayString();
+      final isReserved = reservedNames.contains(paramName);
+      final paramType = param.type.getDisplayString();
 
+      if (!isReserved) {
         fieldsDeclarations.add('  final $paramType $paramName;');
+      }
 
-        final defaultCode = param.defaultValueCode != null
-            ? ' = ${param.defaultValueCode}'
-            : '';
+      final defaultCode = param.defaultValueCode != null
+          ? ' = ${param.defaultValueCode}'
+          : '';
 
+      if (!isReserved) {
         if (param.isRequiredPositional || param.isRequiredNamed) {
           constructorParams.add('    required this.$paramName,');
         } else {
           constructorParams.add('    this.$paramName$defaultCode,');
         }
+      }
 
-        if (param.isPositional) {
-          positionalCallArgs.add(paramName);
-        } else if (param.isNamed) {
-          namedCallArgs.add('$paramName: $paramName');
-        }
+      if (param.isPositional) {
+        positionalCallArgs.add(paramName);
+      } else if (param.isNamed) {
+        namedCallArgs.add('$paramName: $paramName');
       }
     }
 
@@ -200,7 +238,7 @@ ${constructorParams.join('\n')}
     }
 
     if (isAuthorized) {
-      return $className$typeParamsArgs($callArgsList);
+      return $targetConstructorInvocation($callArgsList);
     }
 
     if (fallback != null) {

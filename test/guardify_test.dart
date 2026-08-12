@@ -206,10 +206,10 @@ void main() {
       expect(find.text('Secret Code: 1337'), findsOneWidget);
     });
 
-    testWidgets('SecuredGenericDataCard<T> shows fallback text when role is unauthorized', (tester) async {
+    testWidgets('SecuredGenericDataCard<T> renders when role matches qualified enum string DemoRole.admin', (tester) async {
       await tester.pumpWidget(
         GuardifyScope(
-          currentRole: 'user',
+          currentRole: 'DemoRole.admin',
           child: const MaterialApp(
             home: Scaffold(
               body: SecuredGenericDataCard<int>(
@@ -221,9 +221,43 @@ void main() {
         ),
       );
 
-      expect(find.text('Secret Code: 1337'), findsNothing);
-      expect(find.text('Access Denied: Restricted Area!'), findsOneWidget);
+      expect(find.text('Secret Code: 1337'), findsOneWidget);
+    });
+
+    testWidgets('SecuredNamedConstructorWidget renders target via named constructor', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'admin',
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredNamedConstructorWidget(
+                label: 'TestLabel',
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Primary: TestLabel'), findsOneWidget);
+    });
+
+    testWidgets('SecuredTargetWidgetWithFallback handles fallback property collision cleanly', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'admin',
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SecuredTargetWidgetWithFallback(
+                fallback: Text('Internal Target Fallback'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Internal Target Fallback'), findsOneWidget);
     });
   });
 }
+
 

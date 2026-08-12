@@ -112,6 +112,39 @@ class GenericDataCard<T> extends StatelessWidget {
 }
 
 
+// 5. Named Constructor Widget
+@Secured(['admin'])
+class NamedConstructorWidget extends StatelessWidget {
+  final String label;
+
+  const NamedConstructorWidget.primary({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('Primary: $label');
+  }
+}
+
+// 6. Target Widget with Property Collision ('fallback')
+@Secured(['admin'])
+class TargetWidgetWithFallback extends StatelessWidget {
+  final Widget? fallback;
+
+  const TargetWidgetWithFallback({
+    super.key,
+    this.fallback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(child: fallback);
+  }
+}
+
+
 // --- MAIN FLUTTER APP ---
 
 void main() {

@@ -180,7 +180,7 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const allowedRoles = <String>['admin'];
+    const allowedRoles = <String>['admin', 'DemoRole.admin'];
     final scope = GuardifyScope.of(context);
 
     final activeRoles = <String>{
@@ -211,5 +211,94 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
         style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
       ),
     );
+  }
+}
+
+class SecuredNamedConstructorWidget extends StatelessWidget {
+  final String? currentRole;
+  final Iterable<String>? currentRoles;
+  final Widget? fallback;
+
+  final String label;
+
+  const SecuredNamedConstructorWidget({
+    super.key,
+    this.currentRole,
+    this.currentRoles,
+    this.fallback,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const allowedRoles = <String>['admin'];
+    final scope = GuardifyScope.of(context);
+
+    final activeRoles = <String>{
+      if (currentRole != null) currentRole!,
+      if (currentRoles != null) ...currentRoles!,
+      if (scope != null && scope.currentRole != null) scope.currentRole!,
+      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+    };
+
+    final bool isAuthorized;
+    if (scope?.permissionChecker != null) {
+      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+    } else {
+      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
+    }
+
+    if (isAuthorized) {
+      return NamedConstructorWidget.primary(label: label);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    return const SizedBox.shrink();
+  }
+}
+
+class SecuredTargetWidgetWithFallback extends StatelessWidget {
+  final String? currentRole;
+  final Iterable<String>? currentRoles;
+  final Widget? fallback;
+
+  const SecuredTargetWidgetWithFallback({
+    super.key,
+    this.currentRole,
+    this.currentRoles,
+    this.fallback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const allowedRoles = <String>['admin'];
+    final scope = GuardifyScope.of(context);
+
+    final activeRoles = <String>{
+      if (currentRole != null) currentRole!,
+      if (currentRoles != null) ...currentRoles!,
+      if (scope != null && scope.currentRole != null) scope.currentRole!,
+      if (scope != null && scope.currentRoles != null) ...scope.currentRoles!,
+    };
+
+    final bool isAuthorized;
+    if (scope?.permissionChecker != null) {
+      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+    } else {
+      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
+    }
+
+    if (isAuthorized) {
+      return TargetWidgetWithFallback(fallback: fallback);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    return const SizedBox.shrink();
   }
 }

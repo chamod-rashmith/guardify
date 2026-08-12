@@ -1,3 +1,9 @@
+## 1.1.1
+
+- 🐛 **Named Constructor Selection**: Added automatic fallback to the first public constructor for widgets with named constructors (e.g. `MyWidget.primary(...)`).
+- 🔑 **Dual Enum Role Matching**: Extracted both short Enum name (`'admin'`) and qualified Enum name (`'DemoRole.admin'`) for seamless Enum role resolution.
+- 🛡️ **Reserved Parameter Collision Fix**: Prevented property name collisions when target widget constructors use parameters named `currentRole`, `currentRoles`, or `fallback`.
+
 ## 1.1.0
 
 - 🚀 **Generic Widget Support (`<T>`)**: Generates type-safe wrapper classes preserving generic type parameters and bounds (e.g. `SecuredGenericDataCard<T>`).
