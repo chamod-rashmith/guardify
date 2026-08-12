@@ -1,3 +1,7 @@
+## 1.1.3
+
+- 🧹 **Dart Linter `use_null_aware_elements` Fix**: Refactored `SecuredGenerator` template to construct `activeRoles` Set imperatively using `.add()` and `.addAll()` with local variable type promotion (`directRole`, `directRoles`, `scopeRole`, `scopeRoles`), completely eliminating collection-if checks and resolving `use_null_aware_elements` linter warnings across all Dart 3.0+ linter configurations.
+
 ## 1.1.2
 
 - 🧹 **Dart 3.0+ Null-Aware Collection Elements**: Updated `SecuredGenerator` template to use null-aware pattern matching (`if (... case final role?) role` and `...?`) to eliminate `use_null_aware_elements` linter warnings.

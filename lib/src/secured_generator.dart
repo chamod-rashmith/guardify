@@ -132,9 +132,8 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
     final positionalCallArgs = <String>[];
     final namedCallArgs = <String>[];
 
-    final List<dynamic> params =
-        ((constructor as dynamic).formalParameters ?? (constructor as dynamic).parameters)
-            as List<dynamic>;
+    final List<dynamic> params = ((constructor as dynamic).formalParameters ??
+        (constructor as dynamic).parameters) as List<dynamic>;
     for (final param in params) {
       final paramName = param.name;
       // Skip null or 'key' parameter as super handles key
@@ -147,9 +146,8 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         fieldsDeclarations.add('  final $paramType $paramName;');
       }
 
-      final defaultCode = param.defaultValueCode != null
-          ? ' = ${param.defaultValueCode}'
-          : '';
+      final defaultCode =
+          param.defaultValueCode != null ? ' = ${param.defaultValueCode}' : '';
 
       if (!isReserved) {
         if (param.isRequiredPositional || param.isRequiredNamed) {
@@ -209,7 +207,8 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         ? 'allowedRoles.every((r) => activeRoles.contains(r))'
         : 'allowedRoles.any((r) => activeRoles.contains(r))';
 
-    final constPrefix = constructor.isConst && callArgsList.isEmpty ? 'const ' : '';
+    final constPrefix =
+        constructor.isConst && callArgsList.isEmpty ? 'const ' : '';
 
     final generatedCode = '''
 class $generatedClassName$typeParamsDecl extends StatelessWidget {
@@ -230,12 +229,16 @@ ${constructorParams.join('\n')}
     const allowedRoles = <String>[$formattedRoles];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {

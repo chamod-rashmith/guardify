@@ -29,12 +29,16 @@ class SecuredDeleteUserButton extends StatelessWidget {
     const allowedRoles = <String>['admin', 'superadmin'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
@@ -75,12 +79,16 @@ class SecuredFinancialReportCard extends StatelessWidget {
     const allowedRoles = <String>['manager', 'finance'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
@@ -123,12 +131,16 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
     const allowedRoles = <String>['admin'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
@@ -183,12 +195,16 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
     const allowedRoles = <String>['admin', 'DemoRole.admin'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
@@ -234,12 +250,16 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
     const allowedRoles = <String>['admin'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
@@ -277,12 +297,16 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
     const allowedRoles = <String>['admin'];
     final scope = GuardifyScope.of(context);
 
-    final activeRoles = <String>{
-      if (currentRole case final role?) role,
-      ...?currentRoles,
-      if (scope?.currentRole case final role?) role,
-      ...?scope?.currentRoles,
-    };
+    final directRole = currentRole;
+    final directRoles = currentRoles;
+    final scopeRole = scope?.currentRole;
+    final scopeRoles = scope?.currentRoles;
+
+    final activeRoles = <String>{};
+    if (directRole != null) activeRoles.add(directRole);
+    if (directRoles != null) activeRoles.addAll(directRoles);
+    if (scopeRole != null) activeRoles.add(scopeRole);
+    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
