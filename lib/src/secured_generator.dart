@@ -126,35 +126,62 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
         ? '$className$typeParamsArgs.$constructorName'
         : '$className$typeParamsArgs';
 
-    final reservedNames = {'currentRole', 'currentRoles', 'fallback'};
+    List<dynamic> params = [];
+    try {
+      params = (constructor as dynamic).parameters as List<dynamic>;
+    } catch (_) {
+      try {
+        params = (constructor as dynamic).formalParameters as List<dynamic>;
+      } catch (_) {
+        params = [];
+      }
+    }
+
+
+    final hasTargetFallbackParam = params.any((p) => p.name == 'fallback');
+    final accessDeniedFallbackPropName =
+        hasTargetFallbackParam ? 'accessDeniedFallback' : 'fallback';
+
     final fieldsDeclarations = <String>[];
     final constructorParams = <String>[];
     final positionalCallArgs = <String>[];
     final namedCallArgs = <String>[];
 
-    final List<dynamic> params = ((constructor as dynamic).formalParameters ??
-        (constructor as dynamic).parameters) as List<dynamic>;
     for (final param in params) {
       final paramName = param.name;
-      // Skip null or 'key' parameter as super handles key
       if (paramName == null || paramName == 'key') continue;
 
-      final isReserved = reservedNames.contains(paramName);
       final paramType = param.type.getDisplayString();
-
-      if (!isReserved) {
-        fieldsDeclarations.add('  final $paramType $paramName;');
-      }
-
       final defaultCode =
           param.defaultValueCode != null ? ' = ${param.defaultValueCode}' : '';
 
-      if (!isReserved) {
-        if (param.isRequiredPositional || param.isRequiredNamed) {
-          constructorParams.add('    required this.$paramName,');
-        } else {
-          constructorParams.add('    this.$paramName$defaultCode,');
+      if (paramName == 'currentRole' || paramName == 'currentRoles') {
+        if (param.isPositional) {
+          fieldsDeclarations.add('  final $paramType $paramName;');
+          if (param.isRequiredPositional) {
+            constructorParams.add('    required this.$paramName,');
+          } else {
+            constructorParams.add('    this.$paramName$defaultCode,');
+          }
+          positionalCallArgs.add(paramName);
+        } else if (param.isNamed) {
+          fieldsDeclarations.add('  final $paramType $paramName;');
+          if (param.isRequiredNamed) {
+            constructorParams.add('    required this.$paramName,');
+          } else {
+            constructorParams.add('    this.$paramName$defaultCode,');
+          }
+          namedCallArgs.add('$paramName: $paramName');
         }
+        continue;
+      }
+
+      fieldsDeclarations.add('  final $paramType $paramName;');
+
+      if (param.isRequiredPositional || param.isRequiredNamed) {
+        constructorParams.add('    required this.$paramName,');
+      } else {
+        constructorParams.add('    this.$paramName$defaultCode,');
       }
 
       if (param.isPositional) {
@@ -210,18 +237,30 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
     final constPrefix =
         constructor.isConst && callArgsList.isEmpty ? 'const ' : '';
 
+    final currentRoleFieldDecl = params.any((p) => p.name == 'currentRole')
+        ? ''
+        : '  final String? currentRole;\n';
+    final currentRolesFieldDecl = params.any((p) => p.name == 'currentRoles')
+        ? ''
+        : '  final Iterable<String>? currentRoles;\n';
+    final fallbackFieldDecl =
+        '  final Widget? $accessDeniedFallbackPropName;\n';
+
+    final currentRoleCtorParam = params.any((p) => p.name == 'currentRole')
+        ? ''
+        : '    this.currentRole,\n';
+    final currentRolesCtorParam = params.any((p) => p.name == 'currentRoles')
+        ? ''
+        : '    this.currentRoles,\n';
+    final fallbackCtorParam =
+        '    this.$accessDeniedFallbackPropName,\n';
+
     final generatedCode = '''
 class $generatedClassName$typeParamsDecl extends StatelessWidget {
-  final String? currentRole;
-  final Iterable<String>? currentRoles;
-  final Widget? fallback;
-$fieldsBlock
+$currentRoleFieldDecl$currentRolesFieldDecl$fallbackFieldDecl$fieldsBlock
   const $generatedClassName({
     super.key,
-    this.currentRole,
-    this.currentRoles,
-    this.fallback,
-${constructorParams.join('\n')}
+$currentRoleCtorParam$currentRolesCtorParam$fallbackCtorParam${constructorParams.join('\n')}
   });
 
   @override
@@ -242,7 +281,11 @@ ${constructorParams.join('\n')}
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: $requireAll);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: $requireAll,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = $roleCheckCondition;
     }
@@ -251,8 +294,8 @@ ${constructorParams.join('\n')}
       return $constPrefix$targetConstructorInvocation($callArgsList);
     }
 
-    if (fallback != null) {
-      return fallback!;
+    if ($accessDeniedFallbackPropName != null) {
+      return $accessDeniedFallbackPropName!;
     }
 
 $fallbackWidgetCode
@@ -268,3 +311,4 @@ $fallbackWidgetCode
     }
   }
 }
+

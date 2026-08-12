@@ -42,7 +42,11 @@ class SecuredDeleteUserButton extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: false,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
     }
@@ -92,7 +96,11 @@ class SecuredFinancialReportCard extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: true);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: true,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.every((r) => activeRoles.contains(r));
     }
@@ -144,7 +152,11 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: false,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
     }
@@ -208,7 +220,11 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: false,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
     }
@@ -263,7 +279,11 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: false,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
     }
@@ -283,12 +303,15 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
 class SecuredTargetWidgetWithFallback extends StatelessWidget {
   final String? currentRole;
   final Iterable<String>? currentRoles;
+  final Widget? accessDeniedFallback;
+
   final Widget? fallback;
 
   const SecuredTargetWidgetWithFallback({
     super.key,
     this.currentRole,
     this.currentRoles,
+    this.accessDeniedFallback,
     this.fallback,
   });
 
@@ -310,7 +333,11 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
 
     final bool isAuthorized;
     if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(allowedRoles, requireAll: false);
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: false,
+        activeRoles: activeRoles,
+      );
     } else {
       isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
     }
@@ -319,8 +346,8 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
       return TargetWidgetWithFallback(fallback: fallback);
     }
 
-    if (fallback != null) {
-      return fallback!;
+    if (accessDeniedFallback != null) {
+      return accessDeniedFallback!;
     }
 
     return const SizedBox.shrink();

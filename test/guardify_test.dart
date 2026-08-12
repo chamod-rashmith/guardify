@@ -80,7 +80,7 @@ void main() {
 
       await tester.pumpWidget(
         GuardifyScope(
-          permissionChecker: (allowedRoles, {requireAll = false}) {
+          permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
             return allowedRoles.contains('superadmin');
           },
           child: MaterialApp(
@@ -316,8 +316,82 @@ void main() {
       expect(find.byType(FinancialReportCard), findsOneWidget);
       expect(find.text('Total Revenue: \$5000.00'), findsOneWidget);
     });
+
+    testWidgets('Returns false when allowedRoles is empty', (tester) async {
+      late bool isAuthorized;
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'admin',
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) {
+                isAuthorized = context.isAuthorized([]);
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+      expect(isAuthorized, isFalse);
+    });
+
+    test('GuardifyScope updateShouldNotify checks content equality rather than reference equality', () {
+      const scope1 = GuardifyScope(
+        currentRoles: ['admin', 'manager'],
+        child: SizedBox(),
+      );
+      const scope2 = GuardifyScope(
+        currentRoles: ['admin', 'manager'],
+        child: SizedBox(),
+      );
+      expect(scope1.updateShouldNotify(scope2), isFalse);
+    });
+
+    testWidgets('permissionChecker receives activeRoles including direct widget role', (tester) async {
+      Set<String>? receivedActiveRoles;
+      await tester.pumpWidget(
+        GuardifyScope(
+          permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
+            receivedActiveRoles = activeRoles;
+            return activeRoles?.contains('admin') ?? false;
+          },
+          child: MaterialApp(
+            home: Scaffold(
+              body: SecuredDeleteUserButton(
+                currentRole: 'admin',
+                userId: 'USR-777',
+                onDelete: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(receivedActiveRoles, contains('admin'));
+      expect(find.byType(DeleteUserButton), findsOneWidget);
+    });
+
+    testWidgets('GuardifyScope normalizes qualified enum strings in currentRole for context extensions', (tester) async {
+      late bool hasRoleAdmin;
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'DemoRole.admin',
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) {
+                hasRoleAdmin = context.hasRole('admin');
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(hasRoleAdmin, isTrue);
+    });
   });
 }
+
 
 
 
