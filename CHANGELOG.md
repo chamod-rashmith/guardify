@@ -1,3 +1,10 @@
+## 1.1.0
+
+- 🚀 **Generic Widget Support (`<T>`)**: Generates type-safe wrapper classes preserving generic type parameters and bounds (e.g. `SecuredGenericDataCard<T>`).
+- 🔑 **Enum & Constant Role Extraction**: `@Secured` annotations now support Enum instances and constant objects in `allowedRoles` (e.g. `@Secured([UserRole.admin])`).
+- 🛡️ **AST Compile-Time Guardrails**: Strict validation ensuring `@Secured` is only applied to Flutter `Widget` classes and enforcing non-empty `allowedRoles` lists.
+- 🎨 **Code Builder & Formatting**: Integrated `DartFormatter` from `dart_style` for clean, formatted generated output.
+
 ## 1.0.0
 
 - 🛡️ **Initial Release of Guardify** - Role-Based UI Access Control (RBAC) code generator for Flutter.
