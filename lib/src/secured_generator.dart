@@ -20,7 +20,9 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
       );
     }
 
+    // ignore: experimental_member_use
     final isWidget = element.name == 'Widget' ||
+        // ignore: experimental_member_use
         element.allSupertypes.any((t) => t.element.name == 'Widget');
     if (!isWidget) {
       throw InvalidGenerationSourceError(
@@ -52,6 +54,7 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
       } else {
         final enumFieldName = object.getField('name')?.toStringValue() ??
             object.getField('_name')?.toStringValue();
+        // ignore: experimental_member_use
         final enumTypeName = object.type?.element?.name;
         if (enumFieldName != null) {
           allowedRolesSet.add(enumFieldName);
@@ -129,7 +132,9 @@ class SecuredGenerator extends GeneratorForAnnotation<Secured> {
     final positionalCallArgs = <String>[];
     final namedCallArgs = <String>[];
 
-    final params = constructor.formalParameters;
+    final List<dynamic> params =
+        ((constructor as dynamic).formalParameters ?? (constructor as dynamic).parameters)
+            as List<dynamic>;
     for (final param in params) {
       final paramName = param.name;
       // Skip null or 'key' parameter as super handles key
