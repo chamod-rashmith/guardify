@@ -158,5 +158,123 @@ void main() {
       expect(find.byType(AnimatedSwitcher), findsOneWidget);
       expect(find.text('Animated Feature'), findsOneWidget);
     });
+
+    testWidgets('Respects requireAll=true constraint on SecuredFeature', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GuardifyScope(
+            currentRoles: ['manager'],
+            child: SecuredFeature(
+              allowedRoles: ['manager', 'finance'],
+              requireAll: true,
+              child: Text('Financial Overview'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Financial Overview'), findsNothing);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GuardifyScope(
+            currentRoles: ['manager', 'finance'],
+            child: SecuredFeature(
+              allowedRoles: ['manager', 'finance'],
+              requireAll: true,
+              child: Text('Financial Overview'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Financial Overview'), findsOneWidget);
+    });
+
+    testWidgets('Renders when authorized via direct widget currentRole / currentRoles', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SecuredFeature(
+            allowedRoles: ['editor'],
+            currentRole: 'editor',
+            child: Text('Editor Workspace'),
+          ),
+        ),
+      );
+
+      expect(find.text('Editor Workspace'), findsOneWidget);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SecuredFeature(
+            allowedRoles: ['editor', 'admin'],
+            requireAll: true,
+            currentRoles: ['editor', 'admin'],
+            child: Text('Super Editor Workspace'),
+          ),
+        ),
+      );
+
+      expect(find.text('Super Editor Workspace'), findsOneWidget);
+    });
+
+    testWidgets('Renders accessDeniedFallback widget override when provided', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GuardifyScope(
+            currentRole: 'guest',
+            child: SecuredFeature(
+              allowedRoles: ['admin'],
+              accessDeniedFallback: Text('Direct Fallback Override'),
+              child: Text('Secret Content'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Secret Content'), findsNothing);
+      expect(find.text('Direct Fallback Override'), findsOneWidget);
+    });
+
+    testWidgets('Renders LockOverlay without badge when showLockBadge is false', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GuardifyScope(
+            currentRole: 'user',
+            child: SecuredFeature(
+              allowedRoles: ['admin'],
+              fallback: FallbackType.disabled,
+              showLockBadge: false,
+              disabledOpacity: 0.3,
+              child: Text('Disabled Without Badge'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Disabled Without Badge'), findsOneWidget);
+      final opacityWidget = tester.widget<Opacity>(find.byType(Opacity));
+      expect(opacityWidget.opacity, equals(0.3));
+      expect(find.byIcon(Icons.lock_outline), findsNothing);
+    });
+
+    testWidgets('Renders custom lockIcon in LockOverlay when provided', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GuardifyScope(
+            currentRole: 'user',
+            child: SecuredFeature(
+              allowedRoles: ['admin'],
+              fallback: FallbackType.disabled,
+              lockIcon: Icon(Icons.key, key: ValueKey('custom_key_icon')),
+              child: Text('Key Locked Feature'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Key Locked Feature'), findsOneWidget);
+      expect(find.byKey(const ValueKey('custom_key_icon')), findsOneWidget);
+    });
   });
 }

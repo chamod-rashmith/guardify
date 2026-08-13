@@ -264,5 +264,27 @@ void main() {
 
       expect(find.byType(DeleteUserButton), findsOneWidget);
     });
+
+    testWidgets('Generated widget invokes GuardifyScope.fallbackBuilder when unauthorized', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'guest',
+          fallbackBuilder: (context, missingRoles, missingPermissions) {
+            return Text('Generated Fallback: ${missingRoles.join(', ')}');
+          },
+          child: MaterialApp(
+            home: Scaffold(
+              body: SecuredDeleteUserButton(
+                userId: 'USR-000',
+                onDelete: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DeleteUserButton), findsNothing);
+      expect(find.text('Generated Fallback: admin, superadmin'), findsOneWidget);
+    });
   });
 }

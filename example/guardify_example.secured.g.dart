@@ -50,12 +50,22 @@ class SecuredDeleteUserButton extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, fallback)) {
-      (true, _) => DeleteUserButton(userId: userId, onDelete: onDelete),
-      (false, final fallback?) => fallback,
-      _ => const SizedBox.shrink(),
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return DeleteUserButton(userId: userId, onDelete: onDelete);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return const SizedBox.shrink();
   }
 }
 
@@ -100,17 +110,27 @@ class SecuredFinancialReportCard extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.every(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, fallback)) {
-      (true, _) => FinancialReportCard(totalRevenue: totalRevenue),
-      (false, final fallback?) => fallback,
-      _ => const Center(
-          child: Text(
-            'Access Denied: Restricted Area!',
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-        ),
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return FinancialReportCard(totalRevenue: totalRevenue);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return const Center(
+      child: Text(
+        'Access Denied: Restricted Area!',
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }
 
@@ -152,24 +172,34 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, fallback)) {
-      (true, _) => const AdminDashboardScreen(),
-      (false, final fallback?) => fallback,
-      _ => Scaffold(
-          appBar: AppBar(title: const Text('Access Denied')),
-          body: const Center(
-            child: Text(
-              'Access Denied: Restricted Area!',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return const AdminDashboardScreen();
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Access Denied')),
+      body: const Center(
+        child: Text(
+          'Access Denied: Restricted Area!',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
-    };
+      ),
+    );
   }
 }
 
@@ -216,17 +246,27 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, fallback)) {
-      (true, _) => GenericDataCard<T>(data: data, title: title),
-      (false, final fallback?) => fallback,
-      _ => const Center(
-          child: Text(
-            'Access Denied: Restricted Area!',
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-        ),
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return GenericDataCard<T>(data: data, title: title);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return const Center(
+      child: Text(
+        'Access Denied: Restricted Area!',
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }
 
@@ -271,12 +311,22 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, fallback)) {
-      (true, _) => NamedConstructorWidget.primary(label: label),
-      (false, final fallback?) => fallback,
-      _ => const SizedBox.shrink(),
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return NamedConstructorWidget.primary(label: label);
+    }
+
+    if (fallback != null) {
+      return fallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return const SizedBox.shrink();
   }
 }
 
@@ -321,11 +371,21 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
         : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, accessDeniedFallback)) {
-      (true, _) => TargetWidgetWithFallback(fallback: fallback),
-      (false, final fallback?) => fallback,
-      _ => const SizedBox.shrink(),
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return TargetWidgetWithFallback(fallback: fallback);
+    }
+
+    if (accessDeniedFallback != null) {
+      return accessDeniedFallback!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles =
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return const SizedBox.shrink();
   }
 }

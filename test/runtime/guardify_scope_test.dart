@@ -137,5 +137,64 @@ void main() {
 
       expect(hasRoleAdmin, isTrue);
     });
+
+    test('GuardifyScope.collectRoles normalizes enum strings and combines scope parameters correctly', () {
+      final scope = const GuardifyScope(
+        currentRole: 'UserRole.superadmin',
+        currentRoles: ['manager', 'Role.finance'],
+        child: SizedBox(),
+      );
+
+      final collected = GuardifyScope.collectRoles(
+        currentRole: 'UserRole.admin',
+        currentRoles: ['editor'],
+        scope: scope,
+      );
+
+      expect(
+        collected,
+        containsAll([
+          'UserRole.admin',
+          'admin',
+          'editor',
+          'UserRole.superadmin',
+          'superadmin',
+          'manager',
+          'Role.finance',
+          'finance',
+        ]),
+      );
+    });
+
+    test('GuardifyScope.isAuthorized evaluates requireAll and single matching correctly', () {
+      const scope = GuardifyScope(
+        currentRoles: ['admin', 'editor'],
+        child: SizedBox(),
+      );
+
+      expect(scope.isAuthorized(['admin', 'viewer'], requireAll: false), isTrue);
+      expect(scope.isAuthorized(['admin', 'editor'], requireAll: true), isTrue);
+      expect(scope.isAuthorized(['admin', 'viewer'], requireAll: true), isFalse);
+      expect(scope.isAuthorized([], requireAll: false), isFalse);
+    });
+
+    test('GuardifyScope updateShouldNotify notifies when fallbackBuilder changes', () {
+      Widget dummyBuilder1(BuildContext context, List<String> r, List<String> p) => const SizedBox();
+      Widget dummyBuilder2(BuildContext context, List<String> r, List<String> p) => const SizedBox();
+
+      final scope1 = GuardifyScope(
+        currentRole: 'admin',
+        fallbackBuilder: dummyBuilder1,
+        child: const SizedBox(),
+      );
+
+      final scope2 = GuardifyScope(
+        currentRole: 'admin',
+        fallbackBuilder: dummyBuilder2,
+        child: const SizedBox(),
+      );
+
+      expect(scope1.updateShouldNotify(scope2), isTrue);
+    });
   });
 }
