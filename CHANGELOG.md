@@ -1,3 +1,13 @@
+## 1.2.0
+
+- ⚡ **High-Performance Bitwise RBAC Engine (`RoleRegistry`)**: Dynamically maps string roles and enum identifiers to 64-bit integer bitmasks (`1 << index`), reducing authorization queries and scope updates (`updateShouldNotify`) to single-cycle $O(1)$ bitwise operations (`&`, `|`).
+- 🔒 **Built-in `FallbackType.disabled` with Lock Overlay**: Automatically wraps unauthorized child widgets with `AbsorbPointer` and configurable opacity (`disabledOpacity`), supporting customizable lock badges/icons (`showLockBadge`, `lockIcon`).
+- 🎨 **Dynamic `fallbackBuilder` Callback**: Allows passing a context-aware fallback builder receiving `(context, missingRoles, missingPermissions)` both locally in `SecuredFeature` / generated `@Secured` widgets and globally in `GuardifyScope`.
+- 🎬 **Animated UI Transitions**: Provides smooth cross-fade transitions (`AnimatedSwitcher`) via `animated: true` and `animationDuration` when role permissions update dynamically.
+- 🧹 **Zero Memory Allocations**: Completely eliminates `Set<String>` allocations, list spreading, and string splitting during widget rebuilds and scope updates.
+- 🛡️ **100% Backward Compatible**: Retains identical developer experience (`@Secured(['admin'])`) without requiring annotation or code changes.
+- 🧪 **Exhaustive Unit Tests**: Added `RoleRegistry` test suite verifying bitmask creation, enum binding, OR/AND logic matching, and zero-mask edge cases.
+
 ## 1.1.5
 
 - ⚡ **Dart 3 Switch Expression UI Rendering**: Refactored `SecuredCodeComposer` to emit modern Dart 3 `switch` expressions with pattern matching (`(true, _)`, `(false, final fallback?)`) for clean, functional UI widget returns.

@@ -12,6 +12,7 @@ A powerful, type-safe **Role-Based UI Access Control (RBAC)** code generation pa
 
 - 🛡️ **Annotation-Based Code Generation**: Simply annotate any Flutter widget with `@Secured(['admin'])`.
 - ⚡ **Zero Prop-Drilling**: Ambient role state resolution via `GuardifyScope` (InheritedWidget).
+- ⚡ **High-Performance Bitwise RBAC Engine (`RoleRegistry`)**: Reduces role evaluation and scope updates to $O(1)$ constant-time bitwise CPU operations (`&`, `|`), eliminating string hashing and memory allocations during Flutter widget rebuilds.
 - 🎨 **Flexible Fallback UI Strategies**:
   - `FallbackType.hide`: Silently hides unauthorized widgets (`SizedBox.shrink()`). Perfect for buttons & cards.
   - `FallbackType.scaffold`: Renders a full "Access Denied" page for screens.
@@ -188,6 +189,17 @@ GuardifyScope(
   child: const MyApp(),
 )
 ```
+
+---
+
+## ⚡ High-Performance Bitwise RBAC Engine
+
+Guardify includes an internal `RoleRegistry` engine that transparently maps role strings and enum identifiers to 64-bit integer bitmasks (`1 << index`).
+
+- **OR Logic (`requireAll: false`)**: Evaluated via single CPU cycle `(activeMask & targetMask) != 0`
+- **AND Logic (`requireAll: true`)**: Evaluated via single CPU cycle `(activeMask & targetMask) == targetMask`
+- **Zero Allocations**: Completely eliminates `Set<String>` and string object instantiation during widget build cycles and `GuardifyScope.updateShouldNotify()` execution.
+- **Zero Developer Overhead**: No code changes required—developers continue writing clean string or enum annotations (`@Secured(['admin', 'manager'])`).
 
 ---
 

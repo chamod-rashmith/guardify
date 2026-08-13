@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'guardify_scope.dart';
 import 'lock_overlay.dart';
+import 'role_registry.dart';
 import 'secured_annotation.dart';
 
 /// A runtime widget that protects a [child] widget subtree with Role-Based Access Control (RBAC).
@@ -21,7 +22,7 @@ class SecuredFeature extends StatelessWidget {
   /// The collection of roles authorized to view/access [child].
   final List<String> allowedRoles;
 
-  /// Controls whether all roles are required (`true`) or any single matching role grants access (`false`).
+  /// Controls whether all roles are required (`true`) or any single role grants access (`false`).
   final bool requireAll;
 
   /// Optional active user role override passed directly to this widget instance.
@@ -85,16 +86,22 @@ class SecuredFeature extends StatelessWidget {
       scope: scope,
     );
 
-    final isAuthorized = (scope?.permissionChecker != null)
-        ? scope!.permissionChecker!(
-            allowedRoles,
-            requireAll: requireAll,
-            activeRoles: activeRoles,
-          )
-        : (allowedRoles.isNotEmpty &&
-            (requireAll
-                ? allowedRoles.every(activeRoles.contains)
-                : allowedRoles.any(activeRoles.contains)));
+    final bool isAuthorized;
+    if (scope?.permissionChecker != null) {
+      isAuthorized = scope!.permissionChecker!(
+        allowedRoles,
+        requireAll: requireAll,
+        activeRoles: activeRoles,
+      );
+    } else {
+      final activeMask = RoleRegistry.getMaskForRoles(activeRoles);
+      final targetMask = RoleRegistry.getMaskForRoles(allowedRoles);
+      isAuthorized = RoleRegistry.matchMask(
+        activeMask: activeMask,
+        targetMask: targetMask,
+        requireAll: requireAll,
+      );
+    }
 
     final resultWidget = switch ((
       isAuthorized,

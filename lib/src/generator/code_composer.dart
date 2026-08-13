@@ -93,22 +93,25 @@ $currentRoleCtorParam$currentRolesCtorParam$fallbackCtorParam${ctorResult.constr
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate and normalize active roles from widget properties and scope
+    // 3. Collect active roles set for custom permissionChecker or missing roles fallbacks
     final activeRoles = GuardifyScope.collectRoles(
       currentRole: currentRole,
       currentRoles: currentRoles,
       scope: scope,
     );
 
-    // 4. Evaluate authorization state using custom permissionChecker or set matching
-    // Guards against empty allowedRoles and handles requireAll constraint
+    // 4. Evaluate authorization state using custom permissionChecker or fast O(1) bitwise matching
     final isAuthorized = (scope?.permissionChecker != null)
         ? scope!.permissionChecker!(
             allowedRoles,
             requireAll: ${annotationData.requireAll},
             activeRoles: activeRoles,
           )
-        : $roleCheckCondition;
+        : RoleRegistry.matchMask(
+            activeMask: RoleRegistry.getMaskForRoles(activeRoles),
+            targetMask: RoleRegistry.getMaskForRoles(allowedRoles),
+            requireAll: ${annotationData.requireAll},
+          );
 
     // 5. Render target component or fallback widget using Dart 3 pattern matching switch expression
     return switch ((

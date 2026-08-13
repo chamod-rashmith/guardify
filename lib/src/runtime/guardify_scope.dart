@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'role_registry.dart';
 
 /// Signature for custom permission evaluation callbacks.
 ///
@@ -55,6 +56,13 @@ class GuardifyScope extends InheritedWidget {
   ///
   /// Combined with [currentRole] when evaluating active permissions.
   final Iterable<String>? currentRoles;
+
+  /// Pre-computed 64-bit integer bitmask flag representing all active roles in this scope.
+  ///
+  /// Generated via [RoleRegistry] to enable constant-time $O(1)$ bitwise authorization checks.
+  int get roleMask => RoleRegistry.getMaskForRoles(
+        collectRoles(currentRole: currentRole, currentRoles: currentRoles),
+      );
 
   /// Optional custom permission checking function.
   ///
@@ -130,19 +138,16 @@ class GuardifyScope extends InheritedWidget {
   /// - [allowedRoles]: List of role strings allowed to access a feature/widget.
   /// - [requireAll]: If `true`, all roles in [allowedRoles] must be active. If `false` (default), any single matching role grants authorization.
   ///
-  /// Returns `false` immediately if [allowedRoles] is empty or if no active roles are present
-  /// and no [permissionChecker] is defined.
+  /// Performs an $O(1)$ constant-time bitwise check via [RoleRegistry].
   bool isAuthorized(List<String> allowedRoles, {bool requireAll = false}) {
     if (allowedRoles.isEmpty) return false;
 
-    // Build normalized set of active roles (supporting qualified enum dot notation)
-    final activeRoles = collectRoles(
-      currentRole: currentRole,
-      currentRoles: currentRoles,
-    );
-
     // Delegate to custom permissionChecker if provided
     if (permissionChecker != null) {
+      final activeRoles = collectRoles(
+        currentRole: currentRole,
+        currentRoles: currentRoles,
+      );
       return permissionChecker!(
         allowedRoles,
         requireAll: requireAll,
@@ -150,35 +155,24 @@ class GuardifyScope extends InheritedWidget {
       );
     }
 
-    if (activeRoles.isEmpty) return false;
+    if (roleMask == 0) return false;
 
-    return requireAll
-        ? allowedRoles.every(activeRoles.contains)
-        : allowedRoles.any(activeRoles.contains);
+    final targetMask = RoleRegistry.getMaskForRoles(allowedRoles);
+    return RoleRegistry.matchMask(
+      activeMask: roleMask,
+      targetMask: targetMask,
+      requireAll: requireAll,
+    );
   }
 
   /// Evaluates whether descendant widgets depending on this scope should rebuild when [oldWidget] updates.
   ///
-  /// Performs content-based set comparison of active roles rather than simple reference equality
-  /// to avoid unnecessary widget rebuilds when identical role lists are passed.
+  /// Performs single-cycle integer equality comparison (`roleMask != oldWidget.roleMask`)
+  /// eliminating set allocations and element iteration during widget rebuilds.
   @override
   bool updateShouldNotify(GuardifyScope oldWidget) {
-    if (currentRole != oldWidget.currentRole ||
+    return roleMask != oldWidget.roleMask ||
         permissionChecker != oldWidget.permissionChecker ||
-        fallbackBuilder != oldWidget.fallbackBuilder) {
-      return true;
-    }
-
-    final newRoles = <String>{
-      if (currentRole != null) currentRole!,
-      if (currentRoles != null) ...currentRoles!,
-    };
-    final oldRoles = <String>{
-      if (oldWidget.currentRole != null) oldWidget.currentRole!,
-      if (oldWidget.currentRoles != null) ...oldWidget.currentRoles!,
-    };
-
-    if (newRoles.length != oldRoles.length) return true;
-    return !newRoles.every(oldRoles.contains);
+        fallbackBuilder != oldWidget.fallbackBuilder;
   }
 }
