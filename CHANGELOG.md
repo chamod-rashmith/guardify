@@ -1,3 +1,12 @@
+## [Unreleased]
+
+- ⚡ **Dart 3 Switch Expression UI Rendering**: Refactored `SecuredCodeComposer` to emit modern Dart 3 `switch` expressions with pattern matching (`(true, _)`, `(false, final fallback?)`) for clean, functional UI widget returns.
+- 🚀 **Declarative Set Collection & Tear-off Optimization**: Aggregates active roles via collection-if spread syntax and replaces lambda closures with tear-off method references (`allowedRoles.any(activeRoles.contains)`).
+- 🔑 **Generated Enum Normalization**: Generated widgets now automatically normalize qualified enum strings (e.g. `'UserRole.admin'` -> `'admin'`), ensuring seamless role matching whether passed directly or via `GuardifyScope`.
+- 🛡️ **Vacuous Truth Protection**: Fixed edge-case bug where empty `allowedRoles` with `requireAll: true` evaluated to `true` due to Dart list `every` semantics.
+- 📝 **Rich Step-by-Step Code Comments**: Added detailed 1-5 numbered inline documentation in generated `.secured.g.dart` widgets explaining role resolution, scope lookup, normalization, evaluation, and fallback selection.
+- 🧪 **Modular Test Suite**: Refactored `test/` into clean domain modules (`test/unit`, `test/runtime`, `test/generator`) with 23 passing tests.
+
 ## 1.1.4
 
 - 🛡️ **Critical Security Patch**: Fixed custom `permissionChecker` bypass where direct widget role props (`currentRole` / `currentRoles`) were ignored when a parent scope defined a custom `permissionChecker`.

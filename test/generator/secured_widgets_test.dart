@@ -2,119 +2,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guardify/guardify.dart';
 
-import '../example/guardify_example.dart';
+import '../../example/guardify_example.dart';
 
 void main() {
-  group('1. Secured Annotation Unit Tests', () {
-    test('Secured annotation holds default values', () {
-      const secured = Secured(['admin']);
-      expect(secured.allowedRoles, contains('admin'));
-      expect(secured.fallback, equals(FallbackType.hide));
-      expect(secured.requireAll, isFalse);
-      expect(secured.name, isNull);
-    });
-
-    test('Secured annotation holds custom values', () {
-      const secured = Secured(
-        ['manager', 'finance'],
-        fallback: FallbackType.scaffold,
-        requireAll: true,
-        name: 'CustomSecuredCard',
-      );
-      expect(secured.allowedRoles, containsAll(['manager', 'finance']));
-      expect(secured.fallback, equals(FallbackType.scaffold));
-      expect(secured.requireAll, isTrue);
-      expect(secured.name, equals('CustomSecuredCard'));
-    });
-  });
-
-  group('2. GuardifyScope & BuildContext Extension Tests', () {
-    testWidgets('GuardifyScope supplies single and multiple active roles', (tester) async {
-      late bool isAdmin;
-      late bool isGuest;
-
-      await tester.pumpWidget(
-        GuardifyScope(
-          currentRole: 'admin',
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) {
-                isAdmin = context.hasRole('admin');
-                isGuest = context.hasRole('guest');
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(isAdmin, isTrue);
-      expect(isGuest, isFalse);
-    });
-
-    testWidgets('context.hasAnyRole and context.hasAllRoles work correctly', (tester) async {
-      late bool hasAny;
-      late bool hasAll;
-
-      await tester.pumpWidget(
-        GuardifyScope(
-          currentRoles: const ['manager', 'finance'],
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) {
-                hasAny = context.hasAnyRole(['admin', 'manager']);
-                hasAll = context.hasAllRoles(['manager', 'finance']);
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(hasAny, isTrue);
-      expect(hasAll, isTrue);
-    });
-
-    testWidgets('GuardifyScope supports custom permissionChecker', (tester) async {
-      late bool isAuthorized;
-
-      await tester.pumpWidget(
-        GuardifyScope(
-          permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
-            return allowedRoles.contains('superadmin');
-          },
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) {
-                isAuthorized = context.isAuthorized(['superadmin']);
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(isAuthorized, isTrue);
-    });
-
-    testWidgets('Returns false when GuardifyScope is missing', (tester) async {
-      late bool isAuth;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              isAuth = context.hasRole('admin');
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
-
-      expect(isAuth, isFalse);
-    });
-  });
-
   group('3. Generated Secured Widgets Tests', () {
     testWidgets('SecuredDeleteUserButton renders when authorized with direct currentRole', (tester) async {
       await tester.pumpWidget(
@@ -317,36 +207,6 @@ void main() {
       expect(find.text('Total Revenue: \$5000.00'), findsOneWidget);
     });
 
-    testWidgets('Returns false when allowedRoles is empty', (tester) async {
-      late bool isAuthorized;
-      await tester.pumpWidget(
-        GuardifyScope(
-          currentRole: 'admin',
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) {
-                isAuthorized = context.isAuthorized([]);
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-      );
-      expect(isAuthorized, isFalse);
-    });
-
-    test('GuardifyScope updateShouldNotify checks content equality rather than reference equality', () {
-      const scope1 = GuardifyScope(
-        currentRoles: ['admin', 'manager'],
-        child: SizedBox(),
-      );
-      const scope2 = GuardifyScope(
-        currentRoles: ['admin', 'manager'],
-        child: SizedBox(),
-      );
-      expect(scope1.updateShouldNotify(scope2), isFalse);
-    });
-
     testWidgets('permissionChecker receives activeRoles including direct widget role', (tester) async {
       Set<String>? receivedActiveRoles;
       await tester.pumpWidget(
@@ -371,27 +231,38 @@ void main() {
       expect(find.byType(DeleteUserButton), findsOneWidget);
     });
 
-    testWidgets('GuardifyScope normalizes qualified enum strings in currentRole for context extensions', (tester) async {
-      late bool hasRoleAdmin;
+    testWidgets('Generated widget normalizes qualified enum string UserRole.admin when widget requires admin', (tester) async {
       await tester.pumpWidget(
-        GuardifyScope(
-          currentRole: 'DemoRole.admin',
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) {
-                hasRoleAdmin = context.hasRole('admin');
-                return const SizedBox();
-              },
+        MaterialApp(
+          home: Scaffold(
+            body: SecuredDeleteUserButton(
+              currentRole: 'UserRole.admin',
+              userId: 'USR-888',
+              onDelete: () {},
             ),
           ),
         ),
       );
 
-      expect(hasRoleAdmin, isTrue);
+      expect(find.byType(DeleteUserButton), findsOneWidget);
+    });
+
+    testWidgets('Generated widget with enum role in GuardifyScope renders target widget requiring base role', (tester) async {
+      await tester.pumpWidget(
+        GuardifyScope(
+          currentRole: 'UserRole.admin',
+          child: MaterialApp(
+            home: Scaffold(
+              body: SecuredDeleteUserButton(
+                userId: 'USR-999',
+                onDelete: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DeleteUserButton), findsOneWidget);
     });
   });
 }
-
-
-
-

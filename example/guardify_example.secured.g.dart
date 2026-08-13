@@ -26,40 +26,53 @@ class SecuredDeleteUserButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['admin', 'superadmin'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: false,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: false,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return DeleteUserButton(userId: userId, onDelete: onDelete);
-    }
-
-    if (fallback != null) {
-      return fallback!;
-    }
-
-    return const SizedBox.shrink();
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, fallback)) {
+      (true, _) => DeleteUserButton(userId: userId, onDelete: onDelete),
+      (false, final fallback?) => fallback,
+      _ => const SizedBox.shrink(),
+    };
   }
 }
 
@@ -80,45 +93,58 @@ class SecuredFinancialReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['manager', 'finance'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: true,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.every(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: true,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.every((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return FinancialReportCard(totalRevenue: totalRevenue);
-    }
-
-    if (fallback != null) {
-      return fallback!;
-    }
-
-    return const Center(
-      child: Text(
-        'Access Denied: Restricted Area!',
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-      ),
-    );
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, fallback)) {
+      (true, _) => FinancialReportCard(totalRevenue: totalRevenue),
+      (false, final fallback?) => fallback,
+      _ => const Center(
+          child: Text(
+            'Access Denied: Restricted Area!',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+        ),
+    };
   }
 }
 
@@ -136,52 +162,65 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['admin'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: false,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: false,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return const AdminDashboardScreen();
-    }
-
-    if (fallback != null) {
-      return fallback!;
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Access Denied')),
-      body: const Center(
-        child: Text(
-          'Access Denied: Restricted Area!',
-          style: TextStyle(
-            color: Colors.red,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, fallback)) {
+      (true, _) => const AdminDashboardScreen(),
+      (false, final fallback?) => fallback,
+      _ => Scaffold(
+          appBar: AppBar(title: const Text('Access Denied')),
+          body: const Center(
+            child: Text(
+              'Access Denied: Restricted Area!',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
-      ),
-    );
+    };
   }
 }
 
@@ -204,45 +243,58 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['admin', 'DemoRole.admin'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: false,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: false,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return GenericDataCard<T>(data: data, title: title);
-    }
-
-    if (fallback != null) {
-      return fallback!;
-    }
-
-    return const Center(
-      child: Text(
-        'Access Denied: Restricted Area!',
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-      ),
-    );
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, fallback)) {
+      (true, _) => GenericDataCard<T>(data: data, title: title),
+      (false, final fallback?) => fallback,
+      _ => const Center(
+          child: Text(
+            'Access Denied: Restricted Area!',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+        ),
+    };
   }
 }
 
@@ -263,40 +315,53 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['admin'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: false,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: false,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return NamedConstructorWidget.primary(label: label);
-    }
-
-    if (fallback != null) {
-      return fallback!;
-    }
-
-    return const SizedBox.shrink();
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, fallback)) {
+      (true, _) => NamedConstructorWidget.primary(label: label),
+      (false, final fallback?) => fallback,
+      _ => const SizedBox.shrink(),
+    };
   }
 }
 
@@ -317,39 +382,52 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Define allowed roles configured via [@Secured] annotation
     const allowedRoles = <String>['admin'];
+
+    // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    final directRole = currentRole;
-    final directRoles = currentRoles;
-    final scopeRole = scope?.currentRole;
-    final scopeRoles = scope?.currentRoles;
+    // 3. Aggregate active user roles from widget parameters and inherited scope
+    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
+    final activeRoles = <String>{
+      if (currentRole != null) ...[
+        currentRole!,
+        if (currentRole!.contains('.')) currentRole!.split('.').last,
+      ],
+      if (currentRoles != null)
+        for (final role in currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+      if (scope?.currentRole != null) ...[
+        scope!.currentRole!,
+        if (scope!.currentRole!.contains('.'))
+          scope!.currentRole!.split('.').last,
+      ],
+      if (scope?.currentRoles != null)
+        for (final role in scope!.currentRoles!) ...[
+          role,
+          if (role.contains('.')) role.split('.').last,
+        ],
+    };
 
-    final activeRoles = <String>{};
-    if (directRole != null) activeRoles.add(directRole);
-    if (directRoles != null) activeRoles.addAll(directRoles);
-    if (scopeRole != null) activeRoles.add(scopeRole);
-    if (scopeRoles != null) activeRoles.addAll(scopeRoles);
+    // 4. Evaluate authorization state using custom permissionChecker or set matching
+    // Guards against empty allowedRoles and handles requireAll constraint
+    final isAuthorized = (scope?.permissionChecker != null)
+        ? scope!.permissionChecker!(
+            allowedRoles,
+            requireAll: false,
+            activeRoles: activeRoles,
+          )
+        : allowedRoles.isNotEmpty && allowedRoles.any(activeRoles.contains);
 
-    final bool isAuthorized;
-    if (scope?.permissionChecker != null) {
-      isAuthorized = scope!.permissionChecker!(
-        allowedRoles,
-        requireAll: false,
-        activeRoles: activeRoles,
-      );
-    } else {
-      isAuthorized = allowedRoles.any((r) => activeRoles.contains(r));
-    }
-
-    if (isAuthorized) {
-      return TargetWidgetWithFallback(fallback: fallback);
-    }
-
-    if (accessDeniedFallback != null) {
-      return accessDeniedFallback!;
-    }
-
-    return const SizedBox.shrink();
+    // 5. Render target component or fallback widget using Dart 3 switch expression
+    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
+    return switch ((isAuthorized, accessDeniedFallback)) {
+      (true, _) => TargetWidgetWithFallback(fallback: fallback),
+      (false, final fallback?) => fallback,
+      _ => const SizedBox.shrink(),
+    };
   }
 }
