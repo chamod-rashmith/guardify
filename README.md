@@ -143,6 +143,37 @@ SecuredAdminDashboardScreen();
 
 ---
 
+## 🎭 Declarative Runtime Gating (`SecuredFeature`)
+
+When you prefer declarative runtime role gating over `@Secured` code generation—or when wrapping dynamic subtrees—use `SecuredFeature`:
+
+```dart
+// 1. Simple Runtime Role Gating
+SecuredFeature(
+  allowedRoles: const ['admin', 'manager'],
+  child: const EditProfileButton(),
+);
+
+// 2. Smooth Cross-Fade Animation on Permission Changes
+SecuredFeature(
+  allowedRoles: const ['admin'],
+  animated: true,
+  animationDuration: const Duration(milliseconds: 300),
+  child: const AdminToolbar(),
+);
+
+// 3. Disabled Lock Badge & Opacity Overlay Strategy
+SecuredFeature(
+  allowedRoles: const ['premium'],
+  fallback: FallbackType.disabled,
+  showLockBadge: true,
+  disabledOpacity: 0.4,
+  child: const AnalyticsDashboard(),
+);
+```
+
+---
+
 ## 🎨 Fallback UI Strategies
 
 | Strategy | Behavior | Typical Use Case |
