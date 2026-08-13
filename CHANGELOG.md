@@ -1,4 +1,4 @@
-## [Unreleased]
+## 1.1.5
 
 - ⚡ **Dart 3 Switch Expression UI Rendering**: Refactored `SecuredCodeComposer` to emit modern Dart 3 `switch` expressions with pattern matching (`(true, _)`, `(false, final fallback?)`) for clean, functional UI widget returns.
 - 🚀 **Declarative Set Collection & Tear-off Optimization**: Aggregates active roles via collection-if spread syntax and replaces lambda closures with tear-off method references (`allowedRoles.any(activeRoles.contains)`).
