@@ -110,22 +110,21 @@ $currentRoleCtorParam$currentRolesCtorParam$fallbackCtorParam${ctorResult.constr
           )
         : $roleCheckCondition;
 
-    // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
-    if (isAuthorized) {
-      return $targetInvocation;
-    }
-
-    if (${ctorResult.accessDeniedFallbackPropName} != null) {
-      return ${ctorResult.accessDeniedFallbackPropName}!;
-    }
-
-    if (scope?.fallbackBuilder != null) {
-      final missingRoles = allowedRoles.where((r) => !activeRoles.contains(r)).toList();
-      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
-    }
-
-    return $fallbackWidgetCode;
+    // 5. Render target component or fallback widget using Dart 3 pattern matching switch expression
+    return switch ((
+      isAuthorized,
+      ${ctorResult.accessDeniedFallbackPropName},
+      scope?.fallbackBuilder,
+    )) {
+      (true, _, _) => $targetInvocation,
+      (false, final fallback?, _) => fallback,
+      (false, _, final builder?) => builder(
+          context,
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList(),
+          const <String>[],
+        ),
+      _ => $fallbackWidgetCode,
+    };
   }
 }
 ''';

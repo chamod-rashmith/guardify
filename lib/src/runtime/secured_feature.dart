@@ -96,23 +96,19 @@ class SecuredFeature extends StatelessWidget {
                 ? allowedRoles.every(activeRoles.contains)
                 : allowedRoles.any(activeRoles.contains)));
 
-    Widget resultWidget;
-
-    if (isAuthorized) {
-      resultWidget = child;
-    } else {
-      final missingRoles =
-          allowedRoles.where((r) => !activeRoles.contains(r)).toList();
-      const missingPermissions = <String>[];
-
-      if (accessDeniedFallback != null) {
-        resultWidget = accessDeniedFallback!;
-      } else if (fallbackBuilder != null) {
-        resultWidget = fallbackBuilder!(context, missingRoles, missingPermissions);
-      } else if (scope?.fallbackBuilder != null) {
-        resultWidget = scope!.fallbackBuilder!(context, missingRoles, missingPermissions);
-      } else {
-        resultWidget = switch (fallback) {
+    final resultWidget = switch ((
+      isAuthorized,
+      accessDeniedFallback,
+      fallbackBuilder ?? scope?.fallbackBuilder,
+    )) {
+      (true, _, _) => child,
+      (false, final fallback?, _) => fallback,
+      (false, _, final builder?) => builder(
+          context,
+          allowedRoles.where((r) => !activeRoles.contains(r)).toList(),
+          const <String>[],
+        ),
+      _ => switch (fallback) {
           FallbackType.hide => const SizedBox.shrink(),
           FallbackType.scaffold => Scaffold(
               appBar: AppBar(
@@ -144,9 +140,8 @@ class SecuredFeature extends StatelessWidget {
               lockIcon: lockIcon,
               child: child,
             ),
-        };
-      }
-    }
+        },
+    };
 
     if (animated) {
       return AnimatedSwitcher(
