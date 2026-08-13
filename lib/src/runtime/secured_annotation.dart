@@ -24,6 +24,13 @@ enum FallbackType {
   /// Useful when a visual placeholder is desired in place of restricted content
   /// without unmounting the parent layout structure.
   text,
+
+  /// Disables user interaction with the child widget while maintaining its layout presence.
+  ///
+  /// Wraps the child in an [AbsorbPointer] and reduces visual opacity, optionally
+  /// displaying a lock overlay badge over the widget. Ideal for disabled buttons,
+  /// locked card features, or premium action controls.
+  disabled,
 }
 
 /// Annotation used to secure Flutter widgets with Role-Based Access Control (RBAC).

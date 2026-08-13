@@ -17,6 +17,9 @@ class SecuredCodeComposer {
     final formattedRoles =
         annotationData.allowedRoles.map((role) => "'$role'").join(', ');
 
+    final targetInvocation =
+        '${ctorResult.constPrefix}${ctorResult.targetConstructorInvocation}(${ctorResult.callArgsList})';
+
     final fallbackWidgetCode = switch (annotationData.fallbackStrategy) {
       'scaffold' => '''Scaffold(
         appBar: AppBar(
@@ -41,6 +44,9 @@ class SecuredCodeComposer {
             fontWeight: FontWeight.bold,
           ),
         ),
+      )''',
+      'disabled' => '''LockOverlay(
+        child: $targetInvocation,
       )''',
       _ => 'const SizedBox.shrink()',
     };
@@ -105,12 +111,21 @@ $currentRoleCtorParam$currentRolesCtorParam$fallbackCtorParam${ctorResult.constr
         : $roleCheckCondition;
 
     // 5. Render target component or fallback widget using Dart 3 switch expression
-    // Returns target widget if authorized; otherwise returns custom fallback or strategy default
-    return switch ((isAuthorized, ${ctorResult.accessDeniedFallbackPropName})) {
-      (true, _) => ${ctorResult.constPrefix}${ctorResult.targetConstructorInvocation}(${ctorResult.callArgsList}),
-      (false, final fallback?) => fallback,
-      _ => $fallbackWidgetCode,
-    };
+    // Returns target widget if authorized; otherwise returns custom fallback, scope fallbackBuilder, or strategy default
+    if (isAuthorized) {
+      return $targetInvocation;
+    }
+
+    if (${ctorResult.accessDeniedFallbackPropName} != null) {
+      return ${ctorResult.accessDeniedFallbackPropName}!;
+    }
+
+    if (scope?.fallbackBuilder != null) {
+      final missingRoles = allowedRoles.where((r) => !activeRoles.contains(r)).toList();
+      return scope!.fallbackBuilder!(context, missingRoles, const <String>[]);
+    }
+
+    return $fallbackWidgetCode;
   }
 }
 ''';

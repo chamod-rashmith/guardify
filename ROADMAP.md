@@ -32,13 +32,13 @@ This document outlines the strategic future development roadmap for **Guardify**
 
 ---
 
-### 📍 Phase 2: Rich UI Fallback Strategies, Lock Overlays & Animated Transitions (`v1.2.0`)
+### 📍 Phase 2: Rich UI Fallback Strategies, Lock Overlays & Animated Transitions (`v1.2.0` - Completed ✅)
 *Focus: Flexible user feedback modes, disabled lock overlays, dynamic fallback builders, and smooth visual transitions for Flutter applications.*
 
-- [ ] **Built-in `FallbackType.disabled` with Lock Overlay**:
+- [x] **Built-in `FallbackType.disabled` with Lock Overlay**:
   - Automatically wraps child widgets with `AbsorbPointer` and reduced opacity (e.g., `0.5`).
   - Supports optional lock badge/overlay icon (e.g., `showLockBadge: true`, custom lock icon) out-of-the-box without requiring custom container wrappers.
-- [ ] **Dynamic `fallbackBuilder` Callback**:
+- [x] **Dynamic `fallbackBuilder` Callback**:
   - Allow passing a context-aware fallback builder function both locally (`@Secured` / `SecuredFeature`) and globally in `GuardifyScope`.
   - Passes missing roles/permissions to the builder so developers can render context-aware UIs (e.g., subscription upgrade banners):
   ```dart
@@ -58,7 +58,7 @@ This document outlines the strategic future development roadmap for **Guardify**
     child: const MyApp(),
   );
   ```
-- [ ] **Smooth UI Transitions / Animated Fallbacks**:
+- [x] **Smooth UI Transitions / Animated Fallbacks**:
   - Provide smooth cross-fade, fade, or slide animations (`AnimatedSwitcher`) when roles update dynamically.
   - Prevents abrupt layout shifts and sudden UI pop-in/pop-out when permissions or roles change.
   ```dart

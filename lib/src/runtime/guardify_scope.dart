@@ -15,6 +15,18 @@ typedef PermissionChecker = bool Function(
   Set<String>? activeRoles,
 });
 
+/// Signature for fallback UI builder functions contextually aware of authorization failures.
+///
+/// Parameters:
+/// - [context]: The active [BuildContext].
+/// - [missingRoles]: Roles from the target widget's `allowedRoles` list that the active scope/user lacks.
+/// - [missingPermissions]: Permissions that the active scope/user lacks (reserved for PBAC/ABAC).
+typedef SecuredFallbackBuilder = Widget Function(
+  BuildContext context,
+  List<String> missingRoles,
+  List<String> missingPermissions,
+);
+
 /// An [InheritedWidget] that supplies active user role state and authorization logic to descendant widgets.
 ///
 /// Place [GuardifyScope] near the root of your application (or above role-restricted
@@ -50,12 +62,19 @@ class GuardifyScope extends InheritedWidget {
   /// Useful for integrating custom access-control engines, scope rules, or dynamic claims.
   final PermissionChecker? permissionChecker;
 
+  /// Optional global fallback builder for unauthorized descendant widgets.
+  ///
+  /// When descendant widgets fail authorization checks and do not define a local fallback
+  /// or override widget, this builder will be invoked with the missing roles and permissions.
+  final SecuredFallbackBuilder? fallbackBuilder;
+
   /// Creates a [GuardifyScope] to propagate role state down the widget tree.
   const GuardifyScope({
     super.key,
     this.currentRole,
     this.currentRoles,
     this.permissionChecker,
+    this.fallbackBuilder,
     required super.child,
   });
 
@@ -145,7 +164,8 @@ class GuardifyScope extends InheritedWidget {
   @override
   bool updateShouldNotify(GuardifyScope oldWidget) {
     if (currentRole != oldWidget.currentRole ||
-        permissionChecker != oldWidget.permissionChecker) {
+        permissionChecker != oldWidget.permissionChecker ||
+        fallbackBuilder != oldWidget.fallbackBuilder) {
       return true;
     }
 
