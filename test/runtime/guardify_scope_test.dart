@@ -196,5 +196,43 @@ void main() {
 
       expect(scope1.updateShouldNotify(scope2), isTrue);
     });
+
+    group('Bitwise RoleMask & Performance Tests', () {
+      test('GuardifyScope pre-computes correct bitwise roleMask integer', () {
+        const scope = GuardifyScope(
+          currentRoles: ['admin', 'manager'],
+          child: SizedBox(),
+        );
+
+        final expectedMask = RoleRegistry.getMaskForRoles(['admin', 'manager']);
+        expect(scope.roleMask, equals(expectedMask));
+      });
+
+      test('updateShouldNotify performs O(1) integer comparison (returns false for same roles)', () {
+        const scope1 = GuardifyScope(
+          currentRole: 'admin',
+          child: SizedBox(),
+        );
+        const scope2 = GuardifyScope(
+          currentRole: 'admin',
+          child: SizedBox(),
+        );
+
+        expect(scope1.updateShouldNotify(scope2), isFalse);
+      });
+
+      test('updateShouldNotify returns true when roleMask changes', () {
+        const scope1 = GuardifyScope(
+          currentRole: 'admin',
+          child: SizedBox(),
+        );
+        const scope2 = GuardifyScope(
+          currentRole: 'manager',
+          child: SizedBox(),
+        );
+
+        expect(scope1.updateShouldNotify(scope2), isTrue);
+      });
+    });
   });
 }
