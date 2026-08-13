@@ -66,6 +66,45 @@ class GuardifyScope extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<GuardifyScope>();
   }
 
+  /// Collects and normalizes active user role strings from direct parameters and ambient scope.
+  ///
+  /// Combines [currentRole] and [currentRoles] from direct widget properties as well as
+  /// inherited [scope] parameters, automatically expanding qualified enum strings
+  /// (e.g. `'UserRole.admin'` -> adds both `'UserRole.admin'` and `'admin'`).
+  static Set<String> collectRoles({
+    String? currentRole,
+    Iterable<String>? currentRoles,
+    GuardifyScope? scope,
+  }) {
+    final activeRoles = <String>{};
+
+    void addRole(String? role) {
+      if (role == null) return;
+      activeRoles.add(role);
+      if (role.contains('.')) {
+        activeRoles.add(role.split('.').last);
+      }
+    }
+
+    addRole(currentRole);
+    if (currentRoles != null) {
+      for (final role in currentRoles) {
+        addRole(role);
+      }
+    }
+
+    if (scope != null) {
+      addRole(scope.currentRole);
+      if (scope.currentRoles != null) {
+        for (final role in scope.currentRoles!) {
+          addRole(role);
+        }
+      }
+    }
+
+    return activeRoles;
+  }
+
   /// Evaluates whether the active scope configuration grants authorization for [allowedRoles].
   ///
   /// Parameters:
@@ -78,21 +117,10 @@ class GuardifyScope extends InheritedWidget {
     if (allowedRoles.isEmpty) return false;
 
     // Build normalized set of active roles (supporting qualified enum dot notation)
-    final activeRoles = <String>{};
-    if (currentRole != null) {
-      activeRoles.add(currentRole!);
-      if (currentRole!.contains('.')) {
-        activeRoles.add(currentRole!.split('.').last);
-      }
-    }
-    if (currentRoles != null) {
-      for (final role in currentRoles!) {
-        activeRoles.add(role);
-        if (role.contains('.')) {
-          activeRoles.add(role.split('.').last);
-        }
-      }
-    }
+    final activeRoles = collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+    );
 
     // Delegate to custom permissionChecker if provided
     if (permissionChecker != null) {
@@ -105,11 +133,9 @@ class GuardifyScope extends InheritedWidget {
 
     if (activeRoles.isEmpty) return false;
 
-    if (requireAll) {
-      return allowedRoles.every((role) => activeRoles.contains(role));
-    } else {
-      return allowedRoles.any((role) => activeRoles.contains(role));
-    }
+    return requireAll
+        ? allowedRoles.every(activeRoles.contains)
+        : allowedRoles.any(activeRoles.contains);
   }
 
   /// Evaluates whether descendant widgets depending on this scope should rebuild when [oldWidget] updates.

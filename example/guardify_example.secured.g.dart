@@ -32,29 +32,12 @@ class SecuredDeleteUserButton extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
@@ -99,29 +82,12 @@ class SecuredFinancialReportCard extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
@@ -168,29 +134,12 @@ class SecuredAdminDashboardScreen extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
@@ -249,29 +198,12 @@ class SecuredGenericDataCard<T> extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
@@ -321,29 +253,12 @@ class SecuredNamedConstructorWidget extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
@@ -388,29 +303,12 @@ class SecuredTargetWidgetWithFallback extends StatelessWidget {
     // 2. Obtain ambient GuardifyScope from BuildContext (if present)
     final scope = GuardifyScope.of(context);
 
-    // 3. Aggregate active user roles from widget parameters and inherited scope
-    // Automatically normalizes qualified enum strings (e.g., 'UserRole.admin' -> 'admin')
-    final activeRoles = <String>{
-      if (currentRole != null) ...[
-        currentRole!,
-        if (currentRole!.contains('.')) currentRole!.split('.').last,
-      ],
-      if (currentRoles != null)
-        for (final role in currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-      if (scope?.currentRole != null) ...[
-        scope!.currentRole!,
-        if (scope!.currentRole!.contains('.'))
-          scope!.currentRole!.split('.').last,
-      ],
-      if (scope?.currentRoles != null)
-        for (final role in scope!.currentRoles!) ...[
-          role,
-          if (role.contains('.')) role.split('.').last,
-        ],
-    };
+    // 3. Aggregate and normalize active roles from widget properties and scope
+    final activeRoles = GuardifyScope.collectRoles(
+      currentRole: currentRole,
+      currentRoles: currentRoles,
+      scope: scope,
+    );
 
     // 4. Evaluate authorization state using custom permissionChecker or set matching
     // Guards against empty allowedRoles and handles requireAll constraint
