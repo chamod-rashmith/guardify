@@ -1,8 +1,8 @@
 /// Strategy for fallback UI when access is denied to a role-gated widget.
 ///
 /// When a user attempts to access a [@Secured] widget without possessing the
-/// required role(s), the generated wrapper widget uses this enum strategy to
-/// determine what UI to display instead.
+/// required role(s) or permission(s), the generated wrapper widget uses this enum
+/// strategy to determine what UI to display instead.
 enum FallbackType {
   /// Completely hides the widget from the UI hierarchy.
   ///
@@ -13,20 +13,27 @@ enum FallbackType {
 
   /// Displays a full-screen "Access Denied" page wrapped in a [Scaffold].
   ///
-  /// Includes a pre-styled [AppBar] and a central warning message in red text.
+  /// Includes an [AppBar] and a warning message.
   /// This strategy is designed for top-level pages or full-screen routes where
   /// hiding the body would leave an empty blank scaffold.
   scaffold,
 
   /// Renders an inline "Access Denied: Restricted Area!" text message.
   ///
-  /// Displays a bold red centered [Text] widget within the layout container.
+  /// Displays a styled centered text widget within the layout container.
   /// Useful when a visual placeholder is desired in place of restricted content
   /// without unmounting the parent layout structure.
   text,
+
+  /// Renders the target widget in a disabled state with reduced opacity and blocked gestures.
+  ///
+  /// Wraps the child in an [AbsorbPointer] with reduced opacity (e.g. 0.5)
+  /// and an optional lock badge overlay. Ideal for SaaS freemium features or gated buttons.
+  disabled,
 }
 
-/// Annotation used to secure Flutter widgets with Role-Based Access Control (RBAC).
+/// Annotation used to secure Flutter widgets with Role-Based Access Control (RBAC)
+/// and Permission-Based Access Control (PBAC).
 ///
 /// Annotating any Flutter [Widget] class with [@Secured] instructs the `guardify`
 /// build runner builder to automatically generate a role-gated wrapper class
@@ -54,6 +61,11 @@ class Secured {
   /// - Qualified enum identifier strings (e.g. `'UserRole.admin'`)
   final List<dynamic> allowedRoles;
 
+  /// Optional fine-grained permission strings authorized to access the widget.
+  ///
+  /// e.g. `['users:delete', 'reports:export']`.
+  final List<String> allowedPermissions;
+
   /// Optional custom class name for the generated wrapper widget.
   ///
   /// If `null` (default), the generator defaults to `Secured<TargetClassName>`.
@@ -69,17 +81,22 @@ class Secured {
 
   /// Controls the logical authorization evaluation strategy.
   ///
-  /// - If `false` (default): The active user needs **any single matching role** in [allowedRoles] (OR logic).
-  /// - If `true`: The active user must possess **all roles** specified in [allowedRoles] (AND logic).
+  /// - If `false` (default): The active user needs **any single matching role or permission** (OR logic).
+  /// - If `true`: The active user must possess **all roles and permissions** (AND logic).
   final bool requireAll;
 
-  /// Instantiates a new [@Secured] annotation definition.
+  /// Opacity multiplier used when [fallback] is [FallbackType.disabled].
   ///
-  /// [allowedRoles] must not be empty.
+  /// Defaults to `0.5`.
+  final double disabledOpacity;
+
+  /// Instantiates a new [@Secured] annotation definition.
   const Secured(
     this.allowedRoles, {
+    this.allowedPermissions = const [],
     this.name,
     this.fallback = FallbackType.hide,
     this.requireAll = false,
+    this.disabledOpacity = 0.5,
   });
 }

@@ -240,6 +240,7 @@ class _GuardifyDemoAppState extends State<GuardifyDemoApp> {
                 Builder(
                   builder: (context) {
                     final isAdmin = context.hasRole('admin');
+                    final canExport = context.hasPermission('reports:export');
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -247,21 +248,64 @@ class _GuardifyDemoAppState extends State<GuardifyDemoApp> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'context.hasRole("admin"): ${isAdmin ? "YES ✅" : "NO ❌"}',
+                        'context.hasRole("admin"): ${isAdmin ? "YES ✅" : "NO ❌"}\n'
+                        'context.hasPermission("reports:export"): ${canExport ? "YES ✅" : "NO ❌"}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     );
                   },
                 ),
 
+                const SizedBox(height: 24),
+
+                // 4. Runtime RoleGate (Zero BuildRunner Required!) with Disabled Lock Overlay
+                const Text('4. Runtime RoleGate (No Code-Gen Needed!):',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                RoleGate(
+                  allowedRoles: const ['admin', 'manager'],
+                  fallbackType: FallbackType.disabled,
+                  lockBadge: const CircleAvatar(
+                    backgroundColor: Colors.black87,
+                    child: Icon(Icons.lock, color: Colors.amber),
+                  ),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      foregroundColor: Colors.white,
+                    ),
+                    icon: const Icon(Icons.flash_on),
+                    label: const Text('Admin / Manager Fast-Track Action'),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Action triggered!')),
+                      );
+                    },
+                  ),
+                ),
+
                 const SizedBox(height: 32),
 
-                // 4. Open Admin Dashboard Screen Button
+                // 5. Open Admin Dashboard Screen Button (Guarded via GuardifyRouteGuard)
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
                   icon: const Icon(Icons.admin_panel_settings),
                   label: const Text('Open Admin Dashboard Screen'),
                   onPressed: () {
+                    final guard = const GuardifyRouteGuard(
+                      allowedRoles: ['admin'],
+                      fallbackPath: '/forbidden',
+                    );
+                    final redirect = guard(context);
+                    if (redirect != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text('GuardifyRouteGuard blocked access to /admin!'),
+                        ),
+                      );
+                      return;
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(

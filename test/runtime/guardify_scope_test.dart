@@ -55,7 +55,7 @@ void main() {
 
       await tester.pumpWidget(
         GuardifyScope(
-          permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
+          permissionChecker: (allowedRoles, {requireAll = false, activeRoles, allowedPermissions, activePermissions}) {
             return allowedRoles.contains('superadmin');
           },
           child: MaterialApp(

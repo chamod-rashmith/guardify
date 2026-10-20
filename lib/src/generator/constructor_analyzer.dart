@@ -18,6 +18,9 @@ class ConstructorAnalysisResult {
   /// Parameter property name for custom runtime fallback widget (`'fallback'` or `'accessDeniedFallback'`).
   final String accessDeniedFallbackPropName;
 
+  /// Parameter property name for custom runtime fallback builder (`'fallbackBuilder'` or `'accessDeniedFallbackBuilder'`).
+  final String accessDeniedFallbackBuilderPropName;
+
   /// List of field declaration lines for the generated wrapper class.
   final List<String> fieldsDeclarations;
 
@@ -33,6 +36,12 @@ class ConstructorAnalysisResult {
   /// Whether target widget constructor already accepts a `currentRoles` parameter.
   final bool hasTargetCurrentRolesParam;
 
+  /// Whether target widget constructor already accepts a `currentPermission` parameter.
+  final bool hasTargetCurrentPermissionParam;
+
+  /// Whether target widget constructor already accepts a `currentPermissions` parameter.
+  final bool hasTargetCurrentPermissionsParam;
+
   /// Instantiates [ConstructorAnalysisResult].
   const ConstructorAnalysisResult({
     required this.typeParamsDecl,
@@ -40,11 +49,14 @@ class ConstructorAnalysisResult {
     required this.targetConstructorInvocation,
     required this.constPrefix,
     required this.accessDeniedFallbackPropName,
+    required this.accessDeniedFallbackBuilderPropName,
     required this.fieldsDeclarations,
     required this.constructorParams,
     required this.callArgsList,
     required this.hasTargetCurrentRoleParam,
     required this.hasTargetCurrentRolesParam,
+    this.hasTargetCurrentPermissionParam = false,
+    this.hasTargetCurrentPermissionsParam = false,
   });
 }
 
@@ -53,12 +65,6 @@ class WidgetConstructorAnalyzer {
   const WidgetConstructorAnalyzer();
 
   /// Analyzes constructors and formal parameters of target [element].
-  ///
-  /// Inspects:
-  /// - Generic type parameters and bounds.
-  /// - Unnamed constructor or first public constructor fallback.
-  /// - Positional and named parameters, required vs optional flags, default values.
-  /// - Resolves parameter name collision on `fallback` by renaming fallback property to `accessDeniedFallback`.
   ConstructorAnalysisResult analyze(ClassElement element) {
     final className = element.name ?? '';
 
@@ -112,8 +118,16 @@ class WidgetConstructorAnalyzer {
     final accessDeniedFallbackPropName =
         hasTargetFallbackParam ? 'accessDeniedFallback' : 'fallback';
 
+    final hasTargetFallbackBuilderParam =
+        params.any((p) => p.name == 'fallbackBuilder');
+    final accessDeniedFallbackBuilderPropName = hasTargetFallbackBuilderParam
+        ? 'accessDeniedFallbackBuilder'
+        : 'fallbackBuilder';
+
     final hasTargetCurrentRoleParam = params.any((p) => p.name == 'currentRole');
     final hasTargetCurrentRolesParam = params.any((p) => p.name == 'currentRoles');
+    final hasTargetCurrentPermissionParam = params.any((p) => p.name == 'currentPermission');
+    final hasTargetCurrentPermissionsParam = params.any((p) => p.name == 'currentPermissions');
 
     final fieldsDeclarations = <String>[];
     final constructorParams = <String>[];
@@ -128,7 +142,12 @@ class WidgetConstructorAnalyzer {
       final defaultCode =
           param.defaultValueCode != null ? ' = ${param.defaultValueCode}' : '';
 
-      if (paramName == 'currentRole' || paramName == 'currentRoles') {
+      final isSpecialManagedParam = paramName == 'currentRole' ||
+          paramName == 'currentRoles' ||
+          paramName == 'currentPermission' ||
+          paramName == 'currentPermissions';
+
+      if (isSpecialManagedParam) {
         if (param.isPositional) {
           fieldsDeclarations.add('  final $paramType $paramName;');
           if (param.isRequiredPositional) {
@@ -178,11 +197,14 @@ class WidgetConstructorAnalyzer {
       targetConstructorInvocation: targetConstructorInvocation,
       constPrefix: constPrefix,
       accessDeniedFallbackPropName: accessDeniedFallbackPropName,
+      accessDeniedFallbackBuilderPropName: accessDeniedFallbackBuilderPropName,
       fieldsDeclarations: fieldsDeclarations,
       constructorParams: constructorParams,
       callArgsList: callArgsList,
       hasTargetCurrentRoleParam: hasTargetCurrentRoleParam,
       hasTargetCurrentRolesParam: hasTargetCurrentRolesParam,
+      hasTargetCurrentPermissionParam: hasTargetCurrentPermissionParam,
+      hasTargetCurrentPermissionsParam: hasTargetCurrentPermissionsParam,
     );
   }
 }

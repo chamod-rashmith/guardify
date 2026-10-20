@@ -1,3 +1,14 @@
+## 1.2.0
+
+- 🛡️ **Dual-Mode Access Control**: Introduced `RoleGate` (and `SecuredFeature` alias) for zero-boilerplate runtime role and permission gating of any Flutter or third-party widget with **zero build_runner required**.
+- 🔒 **Disabled Fallback with Lock Overlay**: Added `FallbackType.disabled` strategy wrapping child widgets in `AbsorbPointer` with configurable `disabledOpacity` and optional `lockBadge` overlay (e.g. for SaaS freemium upgrades).
+- 🧩 **Dynamic Scope & Widget Fallback Builders**: Added `fallbackBuilder: (context, missingRoles, missingPermissions) => ...` at both widget and `GuardifyScope` level for context-aware access denied rendering.
+- 🔑 **Permission-Based Access Control (PBAC)**: Added first-class permission support via `allowedPermissions`, `currentPermission`, `currentPermissions`, and `context.hasPermission()`, `context.hasAnyPermission()`, `context.hasAllPermissions()`.
+- 🔄 **Reactive Scopes**: Added `GuardifyScope.listenable` (supporting `ValueListenable` and `ChangeNotifier`) and `GuardifyScope.stream` for automatic UI rebuilds on auth state changes.
+- 🧭 **Navigation Route Guard**: Introduced `GuardifyRouteGuard` and `guardifyRedirect` helper for `go_router` and Navigator redirect handling.
+- 🐛 **Variable Shadowing Immunity**: Refactored `SecuredCodeComposer` to strictly isolate generator identifiers (`guardifyScope`, `guardifyIsAuthorized`, etc.) from target widget constructor parameters.
+- 🧪 **Expanded Test Suite**: Added 16 new test cases across `role_gate_test.dart`, `route_guard_test.dart`, `permissions_and_scope_extensions_test.dart`, and instance fallback builders (39 passing tests in total).
+
 ## 1.1.5
 
 - ⚡ **Dart 3 Switch Expression UI Rendering**: Refactored `SecuredCodeComposer` to emit modern Dart 3 `switch` expressions with pattern matching (`(true, _)`, `(false, final fallback?)`) for clean, functional UI widget returns.

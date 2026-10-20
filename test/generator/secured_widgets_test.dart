@@ -211,7 +211,7 @@ void main() {
       Set<String>? receivedActiveRoles;
       await tester.pumpWidget(
         GuardifyScope(
-          permissionChecker: (allowedRoles, {requireAll = false, activeRoles}) {
+          permissionChecker: (allowedRoles, {requireAll = false, activeRoles, allowedPermissions, activePermissions}) {
             receivedActiveRoles = activeRoles;
             return activeRoles?.contains('admin') ?? false;
           },
@@ -263,6 +263,26 @@ void main() {
       );
 
       expect(find.byType(DeleteUserButton), findsOneWidget);
+    });
+
+    testWidgets('Generated widget instance fallbackBuilder takes precedence when unauthorized', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SecuredDeleteUserButton(
+              currentRole: 'guest',
+              userId: 'USR-LOCAL-FB',
+              onDelete: () {},
+              fallbackBuilder: (context, missingRoles, missingPerms) {
+                return Text('Instance Gated: ${missingRoles.join(', ')}');
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Instance Gated: admin, superadmin'), findsOneWidget);
+      expect(find.byType(DeleteUserButton), findsNothing);
     });
   });
 }
