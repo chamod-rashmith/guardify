@@ -41,6 +41,7 @@ A powerful, type-safe **Role-Based UI Access Control (RBAC)** and **Permission-B
 - 👥 **Multi-Role & PBAC Support**: Configure roles and fine-grained permissions (`requireAll: true/false`).
 - 🧭 **Route Guard for Navigation**: Easily secure routes with `GuardifyRouteGuard` or `guardifyRedirect` (compatible with `go_router` and Navigator).
 - 🔑 **Custom Permission Checker**: Plug in custom auth callbacks (Firebase Auth, JWT claims, dynamic rules).
+- 📊 **Access Control Matrix (ACM) CLI**: Scan codebase (`@Secured` & `RoleGate`) and generate security audit matrices in Markdown, Console, or JSON.
 - 🚀 **BuildContext Extensions**: Query authorization directly in code using `context.hasRole('admin')` or `context.hasPermission('users:delete')`.
 - 🛡️ **Variable Shadowing Immunity**: Code generator safely isolates internal variables to avoid any parameter collisions.
 
@@ -219,6 +220,33 @@ if (context.hasAllPermissions(['posts:read', 'posts:write'])) { ... }
 | `FallbackType.scaffold` | Full-screen "Access Denied" page with AppBar | Restricted screens / pages |
 | `FallbackType.text` | Renders inline error text message | Form fields, tables |
 | `fallbackBuilder` | Dynamic context-aware builder receiving missing roles & permissions | Custom upgrade banners |
+
+---
+
+### 6. Security Audit: Access Control Matrix (ACM) CLI Tool 📊
+
+Guardify comes with an AST-powered command-line audit scanner. It scans your Flutter codebase for `@Secured` annotations and `RoleGate`/`SecuredFeature` runtime widgets, producing an Access Control Matrix (ACM) report for compliance and security documentation.
+
+```bash
+# Print audit matrix directly in your terminal
+dart run guardify:matrix
+
+# Generate Markdown table for documentation or pull request reviews
+dart run guardify:matrix --format=markdown --output=SECURITY_MATRIX.md
+
+# Export JSON for CI/CD compliance validation pipelines
+dart run guardify:matrix --format=json --output=matrix.json
+```
+
+#### CLI Options
+
+| Flag | Shorthand | Description | Default |
+|---|---|---|---|
+| `--path` | `-p` | Directory or file path to scan | `lib` |
+| `--output` | `-o` | Destination file path to save report | Prints to stdout |
+| `--format` | `-f` | Output format: `console`, `markdown`, `json` | `console` |
+| `--verbose` | `-v` | Prints diagnostic scan details | `false` |
+| `--help` | `-h` | Displays usage instructions | |
 
 ---
 

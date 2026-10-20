@@ -63,7 +63,7 @@ This document outlines the strategic development roadmap for **Guardify**. It tr
 
 ---
 
-### 📍 Phase 5: Security Compliance Tooling & Test Helpers (`v2.0.0` - Planned 🚀)
-- [ ] **Access Control Matrix (ACM) CLI Tool**: Command-line generator that scans `@Secured` annotations and exports a markdown/JSON compliance matrix.
+### 📍 Phase 5: Security Compliance Tooling & Test Helpers (`v2.0.0` - In Progress 🚀)
+- [x] **Access Control Matrix (ACM) CLI Tool**: Command-line generator that scans `@Secured` annotations and `RoleGate`/`SecuredFeature` runtime widgets, exporting Markdown, Console, or JSON compliance matrices (`dart run guardify:matrix`).
 - [ ] **Smooth Animated Fallback Transitions**: Built-in cross-fade / slide transitions (`AnimatedSwitcher`) when roles update dynamically.
 - [ ] **`GuardifyTestScope`**: Pre-configured testing scope utility for mocking active roles and permissions during `flutter_test` runs.
