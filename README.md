@@ -274,6 +274,12 @@ Check out our detailed [ROADMAP.md](ROADMAP.md) to explore upcoming features inc
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please check out our [CONTRIBUTING.md](CONTRIBUTING.md) guide for details on our branching model (`dev`), coding standards, running tests, and submitting pull requests.
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
